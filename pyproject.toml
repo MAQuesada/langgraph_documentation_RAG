@@ -1,15 +1,24 @@
-[project]
+[tool.poetry]
 name = "langgraph-documentation-rag"
 version = "0.1.0"
-description = ""
-authors = [
-    {name = "MAQuesada",email = "malejandroquesada@gmail.com"}
-]
+description = "RAG implementation using LangGraph"
+authors = ["MAQuesada <malejandroquesada@gmail.com>"]
 readme = "README.md"
-requires-python = ">=3.12"
-dependencies = [
+
+
+packages = [
+    {include = "prompts"},
+    {include = "other_paq"}
 ]
 
+
+
+[tool.poetry.dependencies]
+python = ">=3.12,<4.0"
+langchain-core = ">=0.3.63,<0.4.0"
+langchain = ">=0.3.25,<0.4.0"
+langchain-openai = ">=0.3.19,<0.4.0"
+pydantic = ">=2.11.5,<3.0.0"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
@@ -18,3 +27,5 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^4.2.0"
 black = "^25.1.0"
+notebook = "^7.4.3"
+ipykernel = "^6.29.5"

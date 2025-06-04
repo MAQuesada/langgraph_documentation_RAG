@@ -38,6 +38,7 @@ repos:
     additional_dependencies:
     - "pydantic>=2.5.2"
     - "types-requests >= 2.32"
+    - "types-pyyaml >= 6.0"
 
 
 # - repo: local

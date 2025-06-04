@@ -25,7 +25,7 @@ poetry --version
 If this is the first time setting up the project, navigate to the project folder and initialize Poetry:
 
 ```bash
-cd ai-agents
+cd langgraph_documentation_RAG
 poetry init
 ```
 
