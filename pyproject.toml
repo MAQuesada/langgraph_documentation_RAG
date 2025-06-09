@@ -13,6 +13,7 @@ packages = [
 
 
 
+
 [tool.poetry.dependencies]
 python = ">=3.12,<4.0"
 langchain-core = ">=0.3.63,<0.4.0"
@@ -44,3 +45,11 @@ pre-commit = "^4.2.0"
 black = "^25.1.0"
 notebook = "^7.4.3"
 ipykernel = "^6.29.5"
+
+
+[tool.poetry]
+name = "langgraph-documentation-rag"
+# ... other settings ...
+packages = [
+    { include = "vector_database" }
+]
