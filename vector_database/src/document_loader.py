@@ -1,6 +1,13 @@
 from git import Repo, GitCommandError
 import os
+import stat
 import shutil
+
+
+def handle_remove_readonly(func, path, exc):
+    """Handle read-only files during directory removal."""
+    os.chmod(path, stat.S_IWRITE)  # Make file writable
+    func(path)  # Retry the operation
 
 def clone_repo(config: dict):
     """Clones a GitHub repo copies it from a local cache, depending on the config.
@@ -18,7 +25,7 @@ def clone_repo(config: dict):
     if os.path.exists(target_path):
         print(f"Target path {target_path} already exists. Removing for fresh clone.")
 
-        shutil.rmtree(target_path)
+        shutil.rmtree(target_path, onerror=handle_remove_readonly)
 
     if local_cache and os.path.exists(local_cache):
         print("Copying from local cache {local_cache} to {target_path}...")

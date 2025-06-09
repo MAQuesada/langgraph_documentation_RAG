@@ -261,3 +261,6 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+#qdrant database for persisted vectorbase data
+qdrant_storage/
