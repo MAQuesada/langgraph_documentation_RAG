@@ -1,0 +1,12 @@
+To deploy a [LangGraph Server](../concepts/langgraph_server.md), follow the how-to guide for [how to deploy a Standalone Container](../cloud/deployment/standalone_container.md).
+
+The Standalone Container deployment option is the least restrictive model for deployment. There is no [control plane](./langgraph_control_plane.md). [Data plane](./langgraph_data_plane.md) infrastructure is managed by you.
+
+![Standalone Container](./img/langgraph_platform_deployment_architecture.png)
+
+The Standalone Container deployment option supports deploying data plane infrastructure to a Kubernetes cluster.
+
+The Standalone Container deployment option supports deploying data plane infrastructure to any Docker-supported compute platform.
+
+The Standalone Container deployment option supports both of the [server versions](../concepts/langgraph_server.md#langgraph-server):
+

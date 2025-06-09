@@ -1,0 +1,37 @@
+Safari blocks plain-HTTP traffic on localhost. When running Studio with `langgraph dev`, you may see "Failed to load assistants" errors.
+
+=== "Python"
+
+=== "JS"
+
+The command outputs a URL in this format:
+
+Use this URL in Safari to load Studio. Here, the `baseUrl` parameter specifies your agent server endpoint.
+
+Chrome and other Chromium browsers allow HTTP on localhost. Use `langgraph dev` without additional configuration.
+
+Brave blocks plain-HTTP traffic on localhost when Brave Shields are enabled. When running Studio with `langgraph dev`, you may see "Failed to load assistants" errors.
+
+Disable Brave Shields for LangSmith using the Brave icon in the URL bar.
+
+![Brave Shields](./img/brave-shields.png)
+
+=== "Python"
+
+=== "JS"
+
+The command outputs a URL in this format:
+
+Use this URL in Brave to load Studio. Here, the `baseUrl` parameter specifies your agent server endpoint.
+
+Undefined conditional edges may show unexpected connections in your graph. This is
+because without proper definition, LangGraph Studio assumes the conditional edge could access all other nodes. To address this, explicitly define the routing paths using one of these methods:
+
+Define a mapping between router outputs and target nodes:
+
+=== "Python"
+
+=== "Javascript"
+
+Specify possible routing destinations using Python's `Literal` type:
+

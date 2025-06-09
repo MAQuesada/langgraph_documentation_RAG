@@ -1,0 +1,4 @@
+This guide explains how to open LangSmith traces in LangGraph Studio for interactive investigation and debugging.
+
+This section explains how to test a local agent against remote traces from LangSmith. This enables you to use production traces as input for local testing, allowing you to debug and verify agent modifications in your development environment.
+

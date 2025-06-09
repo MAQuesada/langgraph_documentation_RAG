@@ -1,0 +1,44 @@
+When defining an `entrypoint`, input is restricted to the first argument of the function. To pass multiple inputs, you can use a dictionary.
+
+??? example "Extended example: simple workflow"
+
+??? example "Extended example: Compose an essay with an LLM"
+
+Tasks can be executed in parallel by invoking them concurrently and waiting for the results. This is useful for improving performance in IO bound tasks (e.g., calling APIs for LLMs).
+
+??? example "Extended example: parallel LLM calls"
+
+The **Functional API** and the [**Graph API**](../concepts/low_level.md) can be used together in the same application as they share the same underlying runtime.
+
+??? example "Extended example: calling a simple graph from the functional API"
+
+You can call other **entrypoints** from within an **entrypoint** or a **task**.
+
+??? example "Extended example: calling another entrypoint"
+
+The **Functional API** uses the same streaming mechanism as the **Graph API**. Please
+read the [**streaming guide**](../concepts/streaming.md) section for more details.
+
+Example of using the streaming API to stream both updates and custom data.
+
+!!! important "Async with Python < 3.11"
+
+When we resume execution, we won't need to re-run the `slow_task` as its result is already saved in the checkpoint.
+
+The functional API supports [human-in-the-loop](../concepts/human_in_the_loop.md) workflows using the `interrupt` function and the `Command` primitive.
+
+Please see the following examples for more details:
+
+Short-term memory allows storing information across different **invocations** of the same **thread id**. See [short-term memory](../concepts/functional_api.md#short-term-memory) for more details.
+
+Use `entrypoint.final` to decouple what is returned to the caller from what is persisted in the checkpoint. This is useful when:
+
+An example of a simple chatbot using the functional API and the `MemorySaver` checkpointer.
+The bot is able to remember the previous conversation and continue from where it left off.
+
+??? example "Extended example: build a simple chatbot"
+
+[long-term memory](../concepts/memory.md#long-term-memory) allows storing information across different **thread ids**. This could be useful for learning information about a given user in one conversation and using it in another.
+
+??? example "Extended example: add long-term memory"
+

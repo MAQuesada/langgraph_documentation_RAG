@@ -1,0 +1,198 @@
+Language: mermaid
+sequenceDiagram
+    participant User
+    participant Client
+    participant AuthServer
+    participant LangGraph Backend
+
+    User->>Client: Initiate login
+    User->>AuthServer: Enter credentials
+    AuthServer->>Client: Send tokens
+    Client->>LangGraph Backend: Request with token
+    LangGraph Backend->>AuthServer: Validate token
+    AuthServer->>LangGraph Backend: Token valid
+    LangGraph Backend->>Client: Serve request (e.g., run agent or graph)
+
+---
+
+Language: bash
+cd custom-auth
+pip install -U "langgraph-cli[inmem]"
+
+---
+
+Language: None
+```shell
+echo "SUPABASE_URL=your-project-url" >> .env
+```
+
+---
+
+Language: None
+```shell
+echo "SUPABASE_SERVICE_KEY=your-service-role-key" >> .env
+```
+
+---
+
+Language: None
+```bash
+SUPABASE_URL=your-project-url
+SUPABASE_SERVICE_KEY=your-service-role-key
+```
+
+---
+
+Language: python hl_lines="8-9 20-30" title="src/security/auth.py"
+import os
+import httpx
+from langgraph_sdk import Auth
+
+auth = Auth()
+
+# This is loaded from the `.env` file you created above
+SUPABASE_URL = os.environ["SUPABASE_URL"]
+SUPABASE_SERVICE_KEY = os.environ["SUPABASE_SERVICE_KEY"]
+
+
+@auth.authenticate
+async def get_current_user(authorization: str | None):
+    """Validate JWT tokens and extract user information."""
+    assert authorization
+    scheme, token = authorization.split()
+    assert scheme.lower() == "bearer"
+
+    try:
+        # Verify token with auth provider
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                f"{SUPABASE_URL}/auth/v1/user",
+                headers={
+                    "Authorization": authorization,
+                    "apiKey": SUPABASE_SERVICE_KEY,
+                },
+            )
+            assert response.status_code == 200
+            user = response.json()
+            return {
+                "identity": user["id"],  # Unique user identifier
+                "email": user["email"],
+                "is_authenticated": True,
+            }
+    except Exception as e:
+        raise Auth.exceptions.HTTPException(status_code=401, detail=str(e))
+
+# ... the rest is the same as before
+
+# Keep our resource authorization from the previous tutorial
+@auth.on
+async def add_owner(ctx, value):
+    """Make resources private to their creator using resource metadata."""
+    filters = {"owner": ctx.user.identity}
+    metadata = value.setdefault("metadata", {})
+    metadata.update(filters)
+    return filters
+
+---
+
+Language: python
+import os
+import httpx
+from getpass import getpass
+from langgraph_sdk import get_client
+
+
+# Get email from command line
+email = getpass("Enter your email: ")
+base_email = email.split("@")
+password = "secure-password"  # CHANGEME
+email1 = f"{base_email[0]}+1@{base_email[1]}"
+email2 = f"{base_email[0]}+2@{base_email[1]}"
+
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
+if not SUPABASE_URL:
+    SUPABASE_URL = getpass("Enter your Supabase project URL: ")
+
+# This is your PUBLIC anon key (which is safe to use client-side)
+# Do NOT mistake this for the secret service role key
+SUPABASE_ANON_KEY = os.environ.get("SUPABASE_ANON_KEY")
+if not SUPABASE_ANON_KEY:
+    SUPABASE_ANON_KEY = getpass("Enter your public Supabase anon  key: ")
+
+
+async def sign_up(email: str, password: str):
+    """Create a new user account."""
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            f"{SUPABASE_URL}/auth/v1/signup",
+            json={"email": email, "password": password},
+            headers={"apiKey": SUPABASE_ANON_KEY},
+        )
+        assert response.status_code == 200
+        return response.json()
+
+# Create two test users
+print(f"Creating test users: {email1} and {email2}")
+await sign_up(email1, password)
+await sign_up(email2, password)
+
+---
+
+Language: python
+async def login(email: str, password: str):
+    """Get an access token for an existing user."""
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            f"{SUPABASE_URL}/auth/v1/token?grant_type=password",
+            json={
+                "email": email,
+                "password": password
+            },
+            headers={
+                "apikey": SUPABASE_ANON_KEY,
+                "Content-Type": "application/json"
+            },
+        )
+        assert response.status_code == 200
+        return response.json()["access_token"]
+
+
+# Log in as user 1
+user1_token = await login(email1, password)
+user1_client = get_client(
+    url="http://localhost:2024", headers={"Authorization": f"Bearer {user1_token}"}
+)
+
+# Create a thread as user 1
+thread = await user1_client.threads.create()
+print(f"✅ User 1 created thread: {thread['thread_id']}")
+
+# Try to access without a token
+unauthenticated_client = get_client(url="http://localhost:2024")
+try:
+    await unauthenticated_client.threads.create()
+    print("❌ Unauthenticated access should fail!")
+except Exception as e:
+    print("✅ Unauthenticated access blocked:", e)
+
+# Try to access user 1's thread as user 2
+user2_token = await login(email2, password)
+user2_client = get_client(
+    url="http://localhost:2024", headers={"Authorization": f"Bearer {user2_token}"}
+)
+
+try:
+    await user2_client.threads.get(thread["thread_id"])
+    print("❌ User 2 shouldn't see User 1's thread!")
+except Exception as e:
+    print("✅ User 2 blocked from User 1's thread:", e)
+
+---
+
+Language: shell
+✅ User 1 created thread: d6af3754-95df-4176-aa10-dbd8dca40f1a
+✅ Unauthenticated access blocked: Client error '403 Forbidden' for url 'http://localhost:2024/threads'
+✅ User 2 blocked from User 1's thread: Client error '404 Not Found' for url 'http://localhost:2024/threads/d6af3754-95df-4176-aa10-dbd8dca40f1a'
+
+---
+

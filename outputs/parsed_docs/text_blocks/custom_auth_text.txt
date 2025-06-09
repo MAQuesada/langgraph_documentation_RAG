@@ -1,0 +1,21 @@
+!!! tip "Prerequisites"
+
+???+ note "Support by deployment type"
+
+This guide shows how to add custom authentication to your LangGraph Platform application. This guide applies to both LangGraph Platform and self-hosted deployments. It does not apply to isolated usage of the LangGraph open source library in your own custom server.
+
+In your `langgraph.json`, add the path to your auth file:
+
+Once you've set up authentication in your server, requests must include the required authorization information based on your chosen scheme.
+Assuming you are using JWT token authentication, you could access your deployments using any of the following methods:
+
+=== "Python Client"
+
+=== "Python RemoteGraph"
+
+=== "JavaScript Client"
+
+=== "JavaScript RemoteGraph"
+
+=== "CURL"
+

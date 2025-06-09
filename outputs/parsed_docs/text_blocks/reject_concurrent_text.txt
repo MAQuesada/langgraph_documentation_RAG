@@ -1,0 +1,38 @@
+This guide assumes knowledge of what double-texting is, which you can learn about in the [double-texting conceptual guide](../../concepts/double_texting.md).
+
+The guide covers the `reject` option for double texting, which rejects the new run of the graph by throwing an error and continues with the original run until completion. Below is a quick example of using the `reject` option.
+
+First, we will define a quick helper function for printing out JS and CURL model outputs (you can skip this if using Python):
+
+=== "Javascript"
+
+=== "CURL"
+
+Now, let's import our required packages and instantiate our client, assistant, and thread.
+
+=== "Python"
+
+=== "Javascript"
+
+=== "CURL"
+
+Now we can run a thread and try to run a second one with the "reject" option, which should fail since we have already started a run:
+
+=== "Python"
+
+=== "Javascript"
+
+=== "CURL"
+
+Output:
+
+We can verify that the original thread finished executing:
+
+=== "Python"
+
+=== "Javascript"
+
+=== "CURL"
+
+Output:
+

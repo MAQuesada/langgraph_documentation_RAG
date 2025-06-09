@@ -1,0 +1,120 @@
+Language: bash
+pip install -U "langgraph-cli[inmem]"
+langgraph new --template=new-langgraph-project-python custom-auth
+cd custom-auth
+
+---
+
+Language: shell
+pip install -e .
+langgraph dev
+
+---
+
+Language: 
+> - 🚀 API: http://127.0.0.1:2024
+> - 🎨 Studio UI: https://smith.langchain.com/studio/?baseUrl=http://127.0.0.1:2024
+> - 📚 API Docs: http://127.0.0.1:2024/docs
+> 
+> This in-memory server is designed for development and testing.
+> For production use, please use LangGraph Platform.
+
+---
+
+Language: None
+In this tutorial, you will start with a hard-coded token for example purposes. You will get to a "production-ready" authentication scheme in the third tutorial.
+
+---
+
+Language: python hl_lines="10 15-16" title="src/security/auth.py"
+from langgraph_sdk import Auth
+
+# This is our toy user database. Do not do this in production
+VALID_TOKENS = {
+    "user1-token": {"id": "user1", "name": "Alice"},
+    "user2-token": {"id": "user2", "name": "Bob"},
+}
+
+# The "Auth" object is a container that LangGraph will use to mark our authentication function
+auth = Auth()
+
+
+# The `authenticate` decorator tells LangGraph to call this function as middleware
+# for every request. This will determine whether the request is allowed or not
+@auth.authenticate
+async def get_current_user(authorization: str | None) -> Auth.types.MinimalUserDict:
+    """Check if the user's token is valid."""
+    assert authorization
+    scheme, token = authorization.split()
+    assert scheme.lower() == "bearer"
+    # Check if token is valid
+    if token not in VALID_TOKENS:
+        raise Auth.exceptions.HTTPException(status_code=401, detail="Invalid token")
+
+    # Return user info if valid
+    user_data = VALID_TOKENS[token]
+    return {
+        "identity": user_data["id"],
+    }
+
+---
+
+Language: json hl_lines="7-9" title="langgraph.json"
+{
+  "dependencies": ["."],
+  "graphs": {
+    "agent": "./src/agent/graph.py:graph"
+  },
+  "env": ".env",
+  "auth": {
+    "path": "src/security/auth.py:auth"
+  }
+}
+
+---
+
+Language: bash
+langgraph dev --no-browser
+
+---
+
+Language: json
+{
+    "auth": {
+        "path": "src/security/auth.py:auth",
+        "disable_studio_auth": "true"
+    }
+}
+
+---
+
+Language: python
+from langgraph_sdk import get_client
+
+# Try without a token (should fail)
+client = get_client(url="http://localhost:2024")
+try:
+    thread = await client.threads.create()
+    print("❌ Should have failed without token!")
+except Exception as e:
+    print("✅ Correctly blocked access:", e)
+
+# Try with a valid token
+client = get_client(
+    url="http://localhost:2024", headers={"Authorization": "Bearer user1-token"}
+)
+
+# Create a thread and chat
+thread = await client.threads.create()
+print(f"✅ Created thread as Alice: {thread['thread_id']}")
+
+response = await client.runs.create(
+    thread_id=thread["thread_id"],
+    assistant_id="agent",
+    input={"messages": [{"role": "user", "content": "Hello!"}]},
+)
+print("✅ Bot responded:")
+print(response)
+
+---
+

@@ -1,0 +1,38 @@
+A LangGraph application consists of one or more graphs, a configuration file (`langgraph.json`), a file that specifies dependencies, and an optional `.env` file that specifies environment variables.
+
+This guide shows a typical structure of an application and shows how the required information to deploy an application using the LangGraph Platform is specified.
+
+To deploy using the LangGraph Platform, the following information should be provided:
+
+Below are examples of directory structures for Python and JavaScript applications:
+
+=== "Python (requirements.txt)"
+
+=== "Python (pyproject.toml)"
+
+=== "JS (package.json)"
+
+!!! note
+
+The `langgraph.json` file is a JSON file that specifies the dependencies, graphs, environment variables, and other settings required to deploy a LangGraph application.
+
+See the [LangGraph configuration file reference](../cloud/reference/cli.md#configuration-file) for details on all supported keys in the JSON file.
+
+!!! tip
+
+=== "Python"
+
+=== "JavaScript"
+
+A LangGraph application may depend on other Python packages or JavaScript libraries (depending on the programming language in which the application is written).
+
+You will generally need to specify the following information for dependencies to be set up correctly:
+
+Use the `graphs` key in the [LangGraph configuration file](#configuration-file-concepts) to specify which graphs will be available in the deployed LangGraph application.
+
+You can specify one or more graphs in the configuration file. Each graph is identified by a name (which should be unique) and a path for either: (1) the compiled graph or (2) a function that makes a graph is defined.
+
+If you're working with a deployed LangGraph application locally, you can configure environment variables in the `env` key of the [LangGraph configuration file](#configuration-file-concepts).
+
+For a production deployment, you will typically want to configure the environment variables in the deployment environment.
+

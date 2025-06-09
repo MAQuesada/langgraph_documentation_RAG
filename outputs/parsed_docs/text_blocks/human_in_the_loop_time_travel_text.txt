@@ -1,0 +1,32 @@
+LangGraph provides [**time travel**](../../concepts/time-travel.md) functionality to **resume execution from a prior checkpoint** — either replaying the same state or modifying it to explore alternatives. In all cases, resuming past execution produces a **new fork** in the history.
+
+To use time-travel in LangGraph:
+
+??? example "Example graph"
+
+=== "Python"
+
+=== "JavaScript"
+
+=== "cURL"
+
+=== "Python"
+
+=== "JavaScript"
+
+=== "cURL"
+
+`update_state` will create a new checkpoint. The new checkpoint will be associated with the same thread, but a new checkpoint ID.
+
+=== "Python"
+
+=== "JavaScript"
+
+=== "cURL"
+
+=== "Python"
+
+=== "JavaScript"
+
+=== "cURL"
+

@@ -1,0 +1,40 @@
+!!! info "Prerequisites"
+
+`RemoteGraph` is an interface that allows you to interact with your LangGraph Platform deployment as if it were a regular, locally-defined LangGraph graph (e.g. a `CompiledGraph`). This guide shows you how you can initialize a `RemoteGraph` and interact with it.
+
+When initializing a `RemoteGraph`, you must always specify:
+
+=== "Python"
+
+=== "JavaScript"
+
+=== "Python"
+
+=== "JavaScript"
+
+Since `RemoteGraph` is a `Runnable` that implements the same methods as `CompiledGraph`, you can interact with it the same way you normally would with a compiled graph, i.e. by calling `.invoke()`, `.stream()`, `.get_state()`, `.update_state()`, etc (as well as their async counterparts).
+
+!!! Note
+
+=== "Python"
+
+=== "JavaScript"
+
+!!! Note
+
+=== "Python"
+
+By default, the graph runs (i.e. `.invoke()` or `.stream()` invocations) are stateless - the checkpoints and the final state of the graph are not persisted. If you would like to persist the outputs of the graph run (for example, to enable human-in-the-loop features), you can create a thread and provide the thread ID via the `config` argument, same as you would with a regular compiled graph:
+
+=== "Python"
+
+=== "JavaScript"
+
+!!! Note
+
+Since the `RemoteGraph` behaves the same way as a regular `CompiledGraph`, it can be also used as a subgraph in another graph. For example:
+
+=== "Python"
+
+=== "JavaScript"
+

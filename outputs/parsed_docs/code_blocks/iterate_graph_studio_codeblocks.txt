@@ -1,0 +1,87 @@
+Language: None
+- [Assistants overview](../../concepts/assistants.md)
+
+---
+
+Language: python
+  system_prompt: str = Field(
+      default="You are a helpful AI assistant.",
+      json_schema_extra={"langgraph_nodes": ["call_model", "other_node"]},
+  )
+
+---
+
+Language: python
+  system_prompt: str = Field(
+      default="You are a helpful AI assistant.",
+      json_schema_extra={
+          "langgraph_nodes": ["call_model"],
+          "langgraph_type": "prompt",
+      },
+  )
+
+---
+
+Language: python
+## Using Pydantic
+from pydantic import BaseModel, Field
+from typing import Annotated, Literal
+
+class Configuration(BaseModel):
+    """The configuration for the agent."""
+
+    system_prompt: str = Field(
+        default="You are a helpful AI assistant.",
+        description="The system prompt to use for the agent's interactions. "
+        "This prompt sets the context and behavior for the agent.",
+        json_schema_extra={
+            "langgraph_nodes": ["call_model"],
+            "langgraph_type": "prompt",
+        },
+    )
+
+    model: Annotated[
+        Literal[
+            "anthropic/claude-3-7-sonnet-latest",
+            "anthropic/claude-3-5-haiku-latest",
+            "openai/o1",
+            "openai/gpt-4o-mini",
+            "openai/o1-mini",
+            "openai/o3-mini",
+        ],
+        {"__template_metadata__": {"kind": "llm"}},
+    ] = Field(
+        default="openai/gpt-4o-mini",
+        description="The name of the language model to use for the agent's main interactions. "
+        "Should be in the form: provider/model-name.",
+        json_schema_extra={"langgraph_nodes": ["call_model"]},
+    )
+
+## Using Dataclasses
+from dataclasses import dataclass, field
+
+@dataclass(kw_only=True)
+class Configuration:
+    """The configuration for the agent."""
+
+    system_prompt: str = field(
+        default="You are a helpful AI assistant.",
+        metadata={
+            "description": "The system prompt to use for the agent's interactions. "
+            "This prompt sets the context and behavior for the agent.",
+            "json_schema_extra": {"langgraph_nodes": ["call_model"]},
+        },
+    )
+
+    model: Annotated[str, {"__template_metadata__": {"kind": "llm"}}] = field(
+        default="anthropic/claude-3-5-sonnet-20240620",
+        metadata={
+            "description": "The name of the language model to use for the agent's main interactions. "
+            "Should be in the form: provider/model-name.",
+            "json_schema_extra": {"langgraph_nodes": ["call_model"]},
+        },
+    )
+
+
+---
+

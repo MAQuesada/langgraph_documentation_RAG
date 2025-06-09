@@ -1,0 +1,1066 @@
+Language: None
+```python
+from langgraph_sdk import get_client
+client = get_client(url=<DEPLOYMENT_URL>, api_key=<API_KEY>)
+
+---
+
+Language: None
+# Using the graph deployed with the name "agent"
+assistant_id = "agent"
+
+---
+
+Language: None
+# create a thread
+thread = await client.threads.create()
+thread_id = thread["thread_id"]
+
+---
+
+Language: None
+# create a streaming run
+# highlight-next-line
+async for chunk in client.runs.stream(
+    thread_id,
+    assistant_id,
+    input=inputs,
+    stream_mode="updates"
+):
+    print(chunk.data)
+```
+
+---
+
+Language: None
+```js
+import { Client } from "@langchain/langgraph-sdk";
+const client = new Client({ apiUrl: <DEPLOYMENT_URL>, apiKey: <API_KEY> });
+
+---
+
+Language: None
+// Using the graph deployed with the name "agent"
+const assistantID = "agent";
+
+---
+
+Language: None
+// create a thread
+const thread = await client.threads.create();
+const threadID = thread["thread_id"];
+
+---
+
+Language: None
+// create a streaming run
+// highlight-next-line
+const streamResponse = client.runs.stream(
+  threadID,
+  assistantID,
+  {
+    input,
+    streamMode: "updates"
+  }
+);
+for await (const chunk of streamResponse) {
+  console.log(chunk.data);
+}
+```
+
+---
+
+Language: None
+Create a thread:
+
+---
+
+Language: None
+```bash
+curl --request POST \
+--url <DEPLOYMENT_URL>/threads \
+--header 'Content-Type: application/json' \
+--data '{}'
+```
+
+---
+
+Language: None
+Create a streaming run:
+
+---
+
+Language: None
+```bash
+curl --request POST \
+--url <DEPLOYMENT_URL>/threads/<THREAD_ID>/runs/stream \
+--header 'Content-Type: application/json' \
+--header 'x-api-key: <API_KEY>'
+--data "{
+  \"assistant_id\": \"agent\",
+  \"input\": <inputs>,
+  \"stream_mode\": \"updates\"
+}"
+```
+
+---
+
+Language: None
+This is an example graph you can run in the LangGraph API server.
+See [LangGraph Platform quickstart](../quick_start.md) for more details.
+
+---
+
+Language: None
+```python
+# graph.py
+from typing import TypedDict
+from langgraph.graph import StateGraph, START, END
+
+---
+
+Language: None
+class State(TypedDict):
+    topic: str
+    joke: str
+
+---
+
+Language: None
+def refine_topic(state: State):
+    return {"topic": state["topic"] + " and cats"}
+
+---
+
+Language: None
+def generate_joke(state: State):
+    return {"joke": f"This is a joke about {state['topic']}"}
+
+---
+
+Language: None
+graph = (
+    StateGraph(State)
+    .add_node(refine_topic)
+    .add_node(generate_joke)
+    .add_edge(START, "refine_topic")
+    .add_edge("refine_topic", "generate_joke")
+    .add_edge("generate_joke", END)
+    .compile()
+)
+```
+
+---
+
+Language: None
+Once you have a running LangGraph API server, you can interact with it using
+[LangGraph SDK](https://langchain-ai.github.io/langgraph/cloud/reference/sdk/python_sdk_ref/)
+
+---
+
+Language: None
+=== "Python"
+
+---
+
+Language: None
+    ```python
+    from langgraph_sdk import get_client
+    client = get_client(url=<DEPLOYMENT_URL>)
+
+---
+
+Language: None
+    # Using the graph deployed with the name "agent"
+    assistant_id = "agent"
+
+---
+
+Language: None
+    # create a thread
+    thread = await client.threads.create()
+    thread_id = thread["thread_id"]
+
+---
+
+Language: None
+    # create a streaming run
+    # highlight-next-line
+    async for chunk in client.runs.stream(  # (1)!
+        thread_id,
+        assistant_id,
+        input={"topic": "ice cream"},
+        # highlight-next-line
+        stream_mode="updates"  # (2)!
+    ):
+        print(chunk.data)
+    ```
+
+---
+
+Language: None
+    1. The `client.runs.stream()` method returns an iterator that yields streamed outputs.
+    2. Set `stream_mode="updates"` to stream only the updates to the graph state after each node. Other stream modes are also available. See [supported stream modes](#supported-stream-modes) for details.
+
+---
+
+Language: None
+=== "JavaScript"
+
+---
+
+Language: None
+    ```js
+    import { Client } from "@langchain/langgraph-sdk";
+    const client = new Client({ apiUrl: <DEPLOYMENT_URL> });
+
+---
+
+Language: None
+    // Using the graph deployed with the name "agent"
+    const assistantID = "agent";
+
+---
+
+Language: None
+    // create a thread
+    const thread = await client.threads.create();
+    const threadID = thread["thread_id"];
+
+---
+
+Language: None
+    // create a streaming run
+    // highlight-next-line
+    const streamResponse = client.runs.stream(  // (1)!
+      threadID,
+      assistantID,
+      {
+        input: { topic: "ice cream" },
+        // highlight-next-line
+        streamMode: "updates"  // (2)!
+      }
+    );
+    for await (const chunk of streamResponse) {
+      console.log(chunk.data);
+    }
+    ```
+
+---
+
+Language: None
+    1. The `client.runs.stream()` method returns an iterator that yields streamed outputs.
+    2. Set `streamMode: "updates"` to stream only the updates to the graph state after each node. Other stream modes are also available. See [supported stream modes](#supported-stream-modes) for details.
+
+---
+
+Language: None
+=== "cURL"
+
+---
+
+Language: None
+    Create a thread:
+
+---
+
+Language: None
+    ```bash
+    curl --request POST \
+    --url <DEPLOYMENT_URL>/threads \
+    --header 'Content-Type: application/json' \
+    --data '{}'
+    ```
+
+---
+
+Language: None
+    Create a streaming run:
+
+---
+
+Language: None
+    ```bash
+    curl --request POST \
+    --url <DEPLOYMENT_URL>/threads/<THREAD_ID>/runs/stream \
+    --header 'Content-Type: application/json' \
+    --data "{
+      \"assistant_id\": \"agent\",
+      \"input\": {\"topic\": \"ice cream\"},
+      \"stream_mode\": \"updates\"
+    }"
+    ```
+
+---
+
+Language: None
+```output
+{'run_id': '1f02c2b3-3cef-68de-b720-eec2a4a8e920', 'attempt': 1}
+{'refine_topic': {'topic': 'ice cream and cats'}}
+{'generate_joke': {'joke': 'This is a joke about ice cream and cats'}}
+```
+
+---
+
+Language: None
+```python
+async for chunk in client.runs.stream(
+    thread_id,
+    assistant_id,
+    input=inputs,
+    stream_mode=["updates", "custom"]
+):
+    print(chunk)
+```
+
+---
+
+Language: None
+```js
+const streamResponse = client.runs.stream(
+  threadID,
+  assistantID,
+  {
+    input,
+    streamMode: ["updates", "custom"]
+  }
+);
+for await (const chunk of streamResponse) {
+  console.log(chunk);
+}
+```
+
+---
+
+Language: None
+```bash
+curl --request POST \
+ --url <DEPLOYMENT_URL>/threads/<THREAD_ID>/runs/stream \
+ --header 'Content-Type: application/json' \
+ --data "{
+   \"assistant_id\": \"agent\",
+   \"input\": <inputs>,
+   \"stream_mode\": [
+     \"updates\"
+     \"custom\"
+   ]
+ }"
+```
+
+---
+
+Language: None
+```python
+from typing import TypedDict
+from langgraph.graph import StateGraph, START, END
+
+---
+
+Language: None
+class State(TypedDict):
+  topic: str
+  joke: str
+
+---
+
+Language: None
+def refine_topic(state: State):
+    return {"topic": state["topic"] + " and cats"}
+
+---
+
+Language: None
+def generate_joke(state: State):
+    return {"joke": f"This is a joke about {state['topic']}"}
+
+---
+
+Language: None
+graph = (
+  StateGraph(State)
+  .add_node(refine_topic)
+  .add_node(generate_joke)
+  .add_edge(START, "refine_topic")
+  .add_edge("refine_topic", "generate_joke")
+  .add_edge("generate_joke", END)
+  .compile()
+)
+```
+
+---
+
+Language: None
+Examples below assume that you want to **persist the outputs** of a streaming run in the [checkpointer](../../concepts/persistence.md) DB and have created a thread. To create a thread:
+
+---
+
+Language: None
+=== "Python"
+
+---
+
+Language: None
+    ```python
+    from langgraph_sdk import get_client
+    client = get_client(url=<DEPLOYMENT_URL>)
+
+---
+
+Language: None
+    # Using the graph deployed with the name "agent"
+    assistant_id = "agent"
+    # create a thread
+    thread = await client.threads.create()
+    thread_id = thread["thread_id"]
+    ```
+
+---
+
+Language: None
+=== "JavaScript"
+
+---
+
+Language: None
+    ```js
+    import { Client } from "@langchain/langgraph-sdk";
+    const client = new Client({ apiUrl: <DEPLOYMENT_URL> });
+
+---
+
+Language: None
+    // Using the graph deployed with the name "agent"
+    const assistantID = "agent";
+    // create a thread
+    const thread = await client.threads.create();
+    const threadID = thread["thread_id"]
+    ```
+
+---
+
+Language: None
+=== "cURL"
+
+---
+
+Language: None
+    ```bash
+    curl --request POST \
+    --url <DEPLOYMENT_URL>/threads \
+    --header 'Content-Type: application/json' \
+    --data '{}'
+    ```
+
+---
+
+Language: None
+If you don't need to persist the outputs of a run, you can pass `None` instead of `thread_id` when streaming.
+
+---
+
+Language: None
+Use this to stream only the **state updates** returned by the nodes after each step. The streamed outputs include the name of the node as well as the update.
+
+---
+
+Language: None
+=== "Python"
+
+---
+
+Language: None
+    ```python
+    async for chunk in client.runs.stream(
+        thread_id,
+        assistant_id,
+        input={"topic": "ice cream"},
+        # highlight-next-line
+        stream_mode="updates"
+    ):
+        print(chunk.data)
+    ```
+
+---
+
+Language: None
+=== "JavaScript"
+
+---
+
+Language: None
+    ```js
+    const streamResponse = client.runs.stream(
+      threadID,
+      assistantID,
+      {
+        input: { topic: "ice cream" },
+        // highlight-next-line
+        streamMode: "updates"
+      }
+    );
+    for await (const chunk of streamResponse) {
+      console.log(chunk.data);
+    }
+    ```
+
+---
+
+Language: None
+=== "cURL"
+
+---
+
+Language: None
+    ```bash
+    curl --request POST \
+    --url <DEPLOYMENT_URL>/threads/<THREAD_ID>/runs/stream \
+    --header 'Content-Type: application/json' \
+    --data "{
+      \"assistant_id\": \"agent\",
+      \"input\": {\"topic\": \"ice cream\"},
+      \"stream_mode\": \"updates\"
+    }"
+    ```
+
+---
+
+Language: None
+Use this to stream the **full state** of the graph after each step.
+
+---
+
+Language: None
+=== "Python"
+
+---
+
+Language: None
+    ```python
+    async for chunk in client.runs.stream(
+        thread_id,
+        assistant_id,
+        input={"topic": "ice cream"},
+        # highlight-next-line
+        stream_mode="values"
+    ):
+        print(chunk.data)
+    ```
+
+---
+
+Language: None
+=== "JavaScript"
+
+---
+
+Language: None
+    ```js
+    const streamResponse = client.runs.stream(
+      threadID,
+      assistantID,
+      {
+        input: { topic: "ice cream" },
+        // highlight-next-line
+        streamMode: "values"
+      }
+    );
+    for await (const chunk of streamResponse) {
+      console.log(chunk.data);
+    }
+    ```
+
+---
+
+Language: None
+=== "cURL"
+
+---
+
+Language: None
+    ```bash
+    curl --request POST \
+    --url <DEPLOYMENT_URL>/threads/<THREAD_ID>/runs/stream \
+    --header 'Content-Type: application/json' \
+    --data "{
+      \"assistant_id\": \"agent\",
+      \"input\": {\"topic\": \"ice cream\"},
+      \"stream_mode\": \"values\"
+    }"
+    ```
+
+---
+
+Language: python
+for chunk in client.runs.stream(
+    thread_id,
+    assistant_id,
+    input={"foo": "foo"},
+    # highlight-next-line
+    stream_subgraphs=True, # (1)!
+    stream_mode="updates",
+):
+    print(chunk)
+
+---
+
+Language: None
+```python
+# graph.py
+from langgraph.graph import START, StateGraph
+from typing import TypedDict
+
+---
+
+Language: None
+# Define subgraph
+class SubgraphState(TypedDict):
+    foo: str  # note that this key is shared with the parent graph state
+    bar: str
+
+---
+
+Language: None
+def subgraph_node_1(state: SubgraphState):
+    return {"bar": "bar"}
+
+---
+
+Language: None
+def subgraph_node_2(state: SubgraphState):
+    return {"foo": state["foo"] + state["bar"]}
+
+---
+
+Language: None
+subgraph_builder = StateGraph(SubgraphState)
+subgraph_builder.add_node(subgraph_node_1)
+subgraph_builder.add_node(subgraph_node_2)
+subgraph_builder.add_edge(START, "subgraph_node_1")
+subgraph_builder.add_edge("subgraph_node_1", "subgraph_node_2")
+subgraph = subgraph_builder.compile()
+
+---
+
+Language: None
+# Define parent graph
+class ParentState(TypedDict):
+    foo: str
+
+---
+
+Language: None
+def node_1(state: ParentState):
+    return {"foo": "hi! " + state["foo"]}
+
+---
+
+Language: None
+builder = StateGraph(ParentState)
+builder.add_node("node_1", node_1)
+builder.add_node("node_2", subgraph)
+builder.add_edge(START, "node_1")
+builder.add_edge("node_1", "node_2")
+graph = builder.compile()
+```
+
+---
+
+Language: None
+Once you have a running LangGraph API server, you can interact with it using
+[LangGraph SDK](https://langchain-ai.github.io/langgraph/cloud/reference/sdk/python_sdk_ref/)
+
+---
+
+Language: None
+=== "Python"
+
+---
+
+Language: None
+    ```python
+    from langgraph_sdk import get_client
+    client = get_client(url=<DEPLOYMENT_URL>)
+
+---
+
+Language: None
+    # Using the graph deployed with the name "agent"
+    assistant_id = "agent"
+
+---
+
+Language: None
+    # create a thread
+    thread = await client.threads.create()
+    thread_id = thread["thread_id"]
+
+    async for chunk in client.runs.stream(
+        thread_id,
+        assistant_id,
+        input={"foo": "foo"},
+        # highlight-next-line
+        stream_subgraphs=True, # (1)!
+        stream_mode="updates",
+    ):
+        print(chunk)
+    ```
+    
+    1. Set `stream_subgraphs=True` to stream outputs from subgraphs.
+
+---
+
+Language: None
+=== "JavaScript"
+
+---
+
+Language: None
+    ```js
+    import { Client } from "@langchain/langgraph-sdk";
+    const client = new Client({ apiUrl: <DEPLOYMENT_URL> });
+
+---
+
+Language: None
+    // Using the graph deployed with the name "agent"
+    const assistantID = "agent";
+
+---
+
+Language: None
+    // create a thread
+    const thread = await client.threads.create();
+    const threadID = thread["thread_id"];
+
+---
+
+Language: None
+    // create a streaming run
+    const streamResponse = client.runs.stream(
+      threadID,
+      assistantID,
+      {
+        input: { foo: "foo" },
+        // highlight-next-line
+        streamSubgraphs: true,  // (1)!
+        streamMode: "updates"
+      }
+    );
+    for await (const chunk of streamResponse) {
+      console.log(chunk);
+    }
+    ```
+
+---
+
+Language: None
+    1. Set `streamSubgraphs: true` to stream outputs from subgraphs.
+
+---
+
+Language: None
+=== "cURL"
+
+---
+
+Language: None
+    Create a thread:
+
+---
+
+Language: None
+    ```bash
+    curl --request POST \
+    --url <DEPLOYMENT_URL>/threads \
+    --header 'Content-Type: application/json' \
+    --data '{}'
+    ```
+
+---
+
+Language: None
+    Create a streaming run:
+
+---
+
+Language: None
+    ```bash
+    curl --request POST \
+    --url <DEPLOYMENT_URL>/threads/<THREAD_ID>/runs/stream \
+    --header 'Content-Type: application/json' \
+    --data "{
+      \"assistant_id\": \"agent\",
+      \"input\": {\"foo\": \"foo\"},
+      \"stream_subgraphs\": true,
+      \"stream_mode\": [
+        \"updates\"
+      ]
+    }"
+    ```
+
+---
+
+Language: None
+**Note** that we are receiving not just the node updates, but we also the namespaces which tell us what graph (or subgraph) we are streaming from.
+
+---
+
+Language: None
+```python
+async for chunk in client.runs.stream(
+    thread_id,
+    assistant_id,
+    input={"topic": "ice cream"},
+    # highlight-next-line
+    stream_mode="debug"
+):
+    print(chunk.data)
+```
+
+---
+
+Language: None
+```js
+const streamResponse = client.runs.stream(
+  threadID,
+  assistantID,
+  {
+    input: { topic: "ice cream" },
+    // highlight-next-line
+    streamMode: "debug"
+  }
+);
+for await (const chunk of streamResponse) {
+  console.log(chunk.data);
+}
+```
+
+---
+
+Language: None
+```bash
+curl --request POST \
+--url <DEPLOYMENT_URL>/threads/<THREAD_ID>/runs/stream \
+--header 'Content-Type: application/json' \
+--data "{
+  \"assistant_id\": \"agent\",
+  \"input\": {\"topic\": \"ice cream\"},
+  \"stream_mode\": \"debug\"
+}"
+```
+
+---
+
+Language: None
+```python
+from dataclasses import dataclass
+
+---
+
+Language: None
+from langchain.chat_models import init_chat_model
+from langgraph.graph import StateGraph, START
+
+---
+
+Language: None
+@dataclass
+class MyState:
+    topic: str
+    joke: str = ""
+
+---
+
+Language: None
+llm = init_chat_model(model="openai:gpt-4o-mini")
+
+---
+
+Language: None
+def call_model(state: MyState):
+    """Call the LLM to generate a joke about a topic"""
+    # highlight-next-line
+    llm_response = llm.invoke( # (1)!
+        [
+            {"role": "user", "content": f"Generate a joke about {state.topic}"}
+        ]
+    )
+    return {"joke": llm_response.content}
+
+---
+
+Language: None
+graph = (
+    StateGraph(MyState)
+    .add_node(call_model)
+    .add_edge(START, "call_model")
+    .compile()
+)
+```
+
+---
+
+Language: None
+1. Note that the message events are emitted even when the LLM is run using `.invoke` rather than `.stream`.
+
+---
+
+Language: None
+```python
+async for chunk in client.runs.stream(
+    thread_id,
+    assistant_id,
+    input={"topic": "ice cream"},
+    # highlight-next-line
+    stream_mode="messages-tuple",
+):
+    if chunk.event != "messages":
+        continue
+
+---
+
+Language: None
+    message_chunk, metadata = chunk.data  # (1)!
+    if message_chunk["content"]:
+        print(message_chunk["content"], end="|", flush=True)
+```
+
+---
+
+Language: None
+1. The "messages-tuple" stream mode returns an iterator of tuples `(message_chunk, metadata)` where `message_chunk` is the token streamed by the LLM and `metadata` is a dictionary with information about the graph node where the LLM was called and other information.
+
+---
+
+Language: None
+```js
+const streamResponse = client.runs.stream(
+  threadID,
+  assistantID,
+  {
+    input: { topic: "ice cream" },
+    // highlight-next-line
+    streamMode: "messages-tuple"
+  }
+);
+for await (const chunk of streamResponse) {
+  if (chunk.event !== "messages") {
+    continue;
+  }
+  console.log(chunk.data[0]["content"]);  // (1)!
+}
+```
+
+---
+
+Language: None
+1. The "messages-tuple" stream mode returns an iterator of tuples `(message_chunk, metadata)` where `message_chunk` is the token streamed by the LLM and `metadata` is a dictionary with information about the graph node where the LLM was called and other information.
+
+---
+
+Language: None
+```bash
+curl --request POST \
+--url <DEPLOYMENT_URL>/threads/<THREAD_ID>/runs/stream \
+--header 'Content-Type: application/json' \
+--data "{
+  \"assistant_id\": \"agent\",
+  \"input\": {\"topic\": \"ice cream\"},
+  \"stream_mode\": \"messages-tuple\"
+}"
+```
+
+---
+
+Language: None
+```python
+async for chunk in client.runs.stream(
+    thread_id,
+    assistant_id,
+    input={"query": "example"},
+    # highlight-next-line
+    stream_mode="custom"
+):
+    print(chunk.data)
+```
+
+---
+
+Language: None
+```js
+const streamResponse = client.runs.stream(
+  threadID,
+  assistantID,
+  {
+    input: { query: "example" },
+    // highlight-next-line
+    streamMode: "custom"
+  }
+);
+for await (const chunk of streamResponse) {
+  console.log(chunk.data);
+}
+```
+
+---
+
+Language: None
+```bash
+curl --request POST \
+--url <DEPLOYMENT_URL>/threads/<THREAD_ID>/runs/stream \
+--header 'Content-Type: application/json' \
+--data "{
+  \"assistant_id\": \"agent\",
+  \"input\": {\"query\": \"example\"},
+  \"stream_mode\": \"custom\"
+}"
+```
+
+---
+
+Language: None
+```python
+async for chunk in client.runs.stream(
+    thread_id,
+    assistant_id,
+    input={"topic": "ice cream"},
+    # highlight-next-line
+    stream_mode="events"
+):
+    print(chunk.data)
+```
+
+---
+
+Language: None
+```js
+const streamResponse = client.runs.stream(
+  threadID,
+  assistantID,
+  {
+    input: { topic: "ice cream" },
+    // highlight-next-line
+    streamMode: "events"
+  }
+);
+for await (const chunk of streamResponse) {
+  console.log(chunk.data);
+}
+```
+
+---
+
+Language: None
+```bash
+curl --request POST \
+--url <DEPLOYMENT_URL>/threads/<THREAD_ID>/runs/stream \
+--header 'Content-Type: application/json' \
+--data "{
+  \"assistant_id\": \"agent\",
+  \"input\": {\"topic\": \"ice cream\"},
+  \"stream_mode\": \"events\"
+}"
+```
+
+---
+

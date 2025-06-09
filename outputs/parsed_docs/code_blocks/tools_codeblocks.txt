@@ -1,0 +1,16 @@
+Language: python
+result = llm_with_tools.invoke("Hello world!")
+
+---
+
+Language: python
+result = llm_with_tools.invoke("What is 2 multiplied by 3?")
+
+---
+
+Language: 
+result.tool_calls
+{'name': 'multiply', 'args': {'a': 2, 'b': 3}, 'id': 'xxx', 'type': 'tool_call'}
+
+---
+

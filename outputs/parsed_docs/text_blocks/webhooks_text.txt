@@ -1,0 +1,36 @@
+When working with LangGraph Platform, you may want to use webhooks to receive updates after an API call completes. Webhooks are useful for triggering actions in your service once a run has finished processing. To implement this, you need to expose an endpoint that can accept `POST` requests and pass this endpoint as a `webhook` parameter in your API request.
+
+Currently, the SDK does not provide built-in support for defining webhook endpoints, but you can specify them manually using API requests.
+
+The following API endpoints accept a `webhook` parameter:
+
+In this guide, we’ll show how to trigger a webhook after streaming a run.
+
+Before making API calls, set up your assistant and thread.
+
+=== "Python"
+
+=== "JavaScript"
+
+=== "CURL"
+
+Example response:
+
+To use a webhook, specify the `webhook` parameter in your API request. When the run completes, LangGraph Platform sends a `POST` request to the specified webhook URL.
+
+For example, if your server listens for webhook events at `https://my-server.app/my-webhook-endpoint`, include this in your request:
+
+=== "Python"
+
+=== "JavaScript"
+
+=== "CURL"
+
+LangGraph Platform sends webhook notifications in the format of a [Run](../../cloud/concepts/runs.md). See the [API Reference](https://langchain-ai.github.io/langgraph/cloud/reference/api/api_ref.html#model/run) for details. The request payload includes run input, configuration, and other metadata in the `kwargs` field.
+
+To ensure only authorized requests hit your webhook endpoint, consider adding a security token as a query parameter:
+
+Your server should extract and validate this token before processing requests.
+
+You can test your webhook using online services like:
+

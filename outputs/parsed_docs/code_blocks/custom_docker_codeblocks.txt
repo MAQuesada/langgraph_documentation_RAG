@@ -1,0 +1,15 @@
+Language: 
+{
+    "dependencies": ["."],
+    "graphs": {
+        "openai_agent": "./openai_agent.py:agent",
+    },
+    "env": "./.env",
+    "dockerfile_lines": [
+        "RUN apt-get update && apt-get install -y libjpeg-dev zlib1g-dev libpng-dev",
+        "RUN pip install Pillow"
+    ]
+}
+
+---
+

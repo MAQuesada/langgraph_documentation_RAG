@@ -1,0 +1,333 @@
+Language: None
+```python
+import os
+from langgraph.prebuilt import create_react_agent
+
+---
+
+Language: None
+os.environ["OPENAI_API_KEY"] = "sk-..."
+
+---
+
+Language: None
+agent = create_react_agent(
+    # highlight-next-line
+    model="openai:gpt-4.1",
+    # other parameters
+)
+```
+
+---
+
+Language: None
+```python
+import os
+from langgraph.prebuilt import create_react_agent
+
+---
+
+Language: None
+os.environ["ANTHROPIC_API_KEY"] = "sk-..."
+
+---
+
+Language: None
+agent = create_react_agent(
+    # highlight-next-line
+    model="anthropic:claude-3-7-sonnet-latest",
+    # other parameters
+)
+```
+
+---
+
+Language: None
+```python
+import os
+from langgraph.prebuilt import create_react_agent
+
+---
+
+Language: None
+os.environ["AZURE_OPENAI_API_KEY"] = "..."
+os.environ["AZURE_OPENAI_ENDPOINT"] = "..."
+os.environ["OPENAI_API_VERSION"] = "2025-03-01-preview"
+
+---
+
+Language: None
+agent = create_react_agent(
+    # highlight-next-line
+    model="azure_openai:gpt-4.1",
+    # other parameters
+)
+```
+
+---
+
+Language: None
+```python
+import os
+from langgraph.prebuilt import create_react_agent
+
+---
+
+Language: None
+os.environ["GOOGLE_API_KEY"] = "..."
+
+---
+
+Language: None
+agent = create_react_agent(
+    # highlight-next-line
+    model="google_genai:gemini-2.0-flash",
+    # other parameters
+)
+```
+
+---
+
+Language: None
+```python
+from langgraph.prebuilt import create_react_agent
+
+---
+
+Language: None
+# Follow the steps here to configure your credentials:
+# https://docs.aws.amazon.com/bedrock/latest/userguide/getting-started.html
+
+---
+
+Language: None
+agent = create_react_agent(
+    # highlight-next-line
+    model="bedrock_converse:anthropic.claude-3-5-sonnet-20240620-v1:0",
+    # other parameters
+)
+```
+
+---
+
+Language: None
+```
+pip install -U "langchain[openai]"
+```
+```python
+import os
+from langchain.chat_models import init_chat_model
+
+---
+
+Language: None
+os.environ["OPENAI_API_KEY"] = "sk-..."
+
+---
+
+Language: None
+model = init_chat_model(
+    "openai:gpt-4.1",
+    temperature=0,
+    # other parameters
+)
+```
+
+---
+
+Language: None
+```
+pip install -U "langchain[anthropic]"
+```
+```python
+import os
+from langchain.chat_models import init_chat_model
+
+---
+
+Language: None
+os.environ["ANTHROPIC_API_KEY"] = "sk-..."
+
+---
+
+Language: None
+model = init_chat_model(
+    "anthropic:claude-3-5-sonnet-latest",
+    temperature=0,
+    # other parameters
+)
+```
+
+---
+
+Language: None
+```
+pip install -U "langchain[openai]"
+```
+```python
+import os
+from langchain.chat_models import init_chat_model
+
+---
+
+Language: None
+os.environ["AZURE_OPENAI_API_KEY"] = "..."
+os.environ["AZURE_OPENAI_ENDPOINT"] = "..."
+os.environ["OPENAI_API_VERSION"] = "2025-03-01-preview"
+
+---
+
+Language: None
+model = init_chat_model(
+    "azure_openai:gpt-4.1",
+    azure_deployment=os.environ["AZURE_OPENAI_DEPLOYMENT_NAME"],
+    temperature=0,
+    # other parameters
+)
+```
+
+---
+
+Language: None
+```
+pip install -U "langchain[google-genai]"
+```
+```python
+import os
+from langchain.chat_models import init_chat_model
+
+---
+
+Language: None
+os.environ["GOOGLE_API_KEY"] = "..."
+
+---
+
+Language: None
+model = init_chat_model(
+    "google_genai:gemini-2.0-flash",
+    temperature=0,
+    # other parameters
+)
+```
+
+---
+
+Language: None
+```
+pip install -U "langchain[aws]"
+```
+```python
+from langchain.chat_models import init_chat_model
+
+---
+
+Language: None
+# Follow the steps here to configure your credentials:
+# https://docs.aws.amazon.com/bedrock/latest/userguide/getting-started.html
+
+---
+
+Language: None
+model = init_chat_model(
+    "anthropic.claude-3-5-sonnet-20240620-v1:0",
+    model_provider="bedrock_converse",
+    temperature=0,
+    # other parameters
+)
+```
+
+---
+
+Language: python
+from langchain_anthropic import ChatAnthropic
+from langgraph.prebuilt import create_react_agent
+
+model = ChatAnthropic(
+    model="claude-3-7-sonnet-latest",
+    temperature=0,
+    max_tokens=2048
+)
+
+agent = create_react_agent(
+    # highlight-next-line
+    model=model,
+    # other parameters
+)
+
+---
+
+Language: None
+The example above uses `ChatAnthropic`, which is already supported by `init_chat_model`. This pattern is shown to illustrate how to manually instantiate a model not available through init_chat_model.
+
+---
+
+Language: None
+```python
+from langchain.chat_models import init_chat_model
+
+---
+
+Language: None
+model = init_chat_model(
+    "anthropic:claude-3-7-sonnet-latest",
+    # highlight-next-line
+    disable_streaming=True
+)
+```
+
+---
+
+Language: None
+```python
+from langchain_anthropic import ChatAnthropic
+
+---
+
+Language: None
+model = ChatAnthropic(
+    model="claude-3-7-sonnet-latest",
+    # highlight-next-line
+    disable_streaming=True
+)
+```
+
+---
+
+Language: None
+```python
+from langchain.chat_models import init_chat_model
+
+---
+
+Language: None
+model_with_fallbacks = (
+    init_chat_model("anthropic:claude-3-5-haiku-latest")
+    # highlight-next-line
+    .with_fallbacks([
+        init_chat_model("openai:gpt-4.1-mini"),
+    ])
+)
+```
+
+---
+
+Language: None
+```python
+from langchain_anthropic import ChatAnthropic
+from langchain_openai import ChatOpenAI
+
+---
+
+Language: None
+model_with_fallbacks = (
+    ChatAnthropic(model="claude-3-5-haiku-latest")
+    # highlight-next-line
+    .with_fallbacks([
+        ChatOpenAI(model="gpt-4.1-mini"),
+    ])
+)
+```
+
+---
+

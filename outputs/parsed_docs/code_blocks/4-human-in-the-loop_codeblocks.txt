@@ -1,0 +1,246 @@
+Language: None
+This tutorial builds on [Add memory](./3-add-memory.md).
+
+---
+
+Language: 
+-->
+
+We can now incorporate it into our `StateGraph` with an additional tool:
+
+``` python hl_lines="12 19 20 21 22 23"
+from typing import Annotated
+
+from langchain_tavily import TavilySearch
+from langchain_core.tools import tool
+from typing_extensions import TypedDict
+
+from langgraph.checkpoint.memory import MemorySaver
+from langgraph.graph import StateGraph, START, END
+from langgraph.graph.message import add_messages
+from langgraph.prebuilt import ToolNode, tools_condition
+
+from langgraph.types import Command, interrupt
+
+class State(TypedDict):
+    messages: Annotated[list, add_messages]
+
+graph_builder = StateGraph(State)
+
+@tool
+def human_assistance(query: str) -> str:
+    """Request assistance from a human."""
+    human_response = interrupt({"query": query})
+    return human_response["data"]
+
+tool = TavilySearch(max_results=2)
+tools = [tool, human_assistance]
+llm_with_tools = llm.bind_tools(tools)
+
+def chatbot(state: State):
+    message = llm_with_tools.invoke(state["messages"])
+    # Because we will be interrupting during tool execution,
+    # we disable parallel tool calling to avoid repeating any
+    # tool invocations when we resume.
+    assert len(message.tool_calls) <= 1
+    return {"messages": [message]}
+
+graph_builder.add_node("chatbot", chatbot)
+
+tool_node = ToolNode(tools=tools)
+graph_builder.add_node("tools", tool_node)
+
+graph_builder.add_conditional_edges(
+    "chatbot",
+    tools_condition,
+)
+graph_builder.add_edge("tools", "chatbot")
+graph_builder.add_edge(START, "chatbot")
+
+---
+
+Language: None
+For more information and examples of human-in-the-loop workflows, see [Human-in-the-loop](../../concepts/human_in_the_loop.md). This includes how to [review and edit tool calls](../../how-tos/human_in_the_loop/review-tool-calls.ipynb) before they are executed.
+
+---
+
+Language: python
+memory = MemorySaver()
+
+graph = graph_builder.compile(checkpointer=memory)
+
+---
+
+Language: python
+from IPython.display import Image, display
+
+try:
+    display(Image(graph.get_graph().draw_mermaid_png()))
+except Exception:
+    # This requires some extra dependencies and is optional
+    pass
+
+---
+
+Language: python
+user_input = "I need some expert guidance for building an AI agent. Could you request assistance for me?"
+config = {"configurable": {"thread_id": "1"}}
+
+events = graph.stream(
+    {"messages": [{"role": "user", "content": user_input}]},
+    config,
+    stream_mode="values",
+)
+for event in events:
+    if "messages" in event:
+        event["messages"][-1].pretty_print()
+
+---
+
+Language: 
+================================ Human Message =================================
+
+I need some expert guidance for building an AI agent. Could you request assistance for me?
+================================== Ai Message ==================================
+
+[{'text': "Certainly! I'd be happy to request expert assistance for you regarding building an AI agent. To do this, I'll use the human_assistance function to relay your request. Let me do that for you now.", 'type': 'text'}, {'id': 'toolu_01ABUqneqnuHNuo1vhfDFQCW', 'input': {'query': 'A user is requesting expert guidance for building an AI agent. Could you please provide some expert advice or resources on this topic?'}, 'name': 'human_assistance', 'type': 'tool_use'}]
+Tool Calls:
+  human_assistance (toolu_01ABUqneqnuHNuo1vhfDFQCW)
+ Call ID: toolu_01ABUqneqnuHNuo1vhfDFQCW
+  Args:
+    query: A user is requesting expert guidance for building an AI agent. Could you please provide some expert advice or resources on this topic?
+
+---
+
+Language: python
+snapshot = graph.get_state(config)
+snapshot.next
+
+---
+
+Language: 
+('tools',)
+
+---
+
+Language: None
+Take a closer look at the `human_assistance` tool:
+
+---
+
+Language: None
+```python
+@tool
+def human_assistance(query: str) -> str:
+    """Request assistance from a human."""
+    human_response = interrupt({"query": query})
+    return human_response["data"]
+```
+
+---
+
+Language: None
+Similar to Python's built-in `input()` function, calling `interrupt` inside the tool will pause execution. Progress is persisted based on the [checkpointer](../../concepts/persistence.md#checkpointer-libraries); so if it is persisting with Postgres, it can resume at any time as long as the database is alive. In this example, it is persisting with the in-memory checkpointer and can resume any time if the Python kernel is running.
+
+---
+
+Language: python
+human_response = (
+    "We, the experts are here to help! We'd recommend you check out LangGraph to build your agent."
+    " It's much more reliable and extensible than simple autonomous agents."
+)
+
+human_command = Command(resume={"data": human_response})
+
+events = graph.stream(human_command, config, stream_mode="values")
+for event in events:
+    if "messages" in event:
+        event["messages"][-1].pretty_print()
+
+---
+
+Language: 
+================================== Ai Message ==================================
+
+[{'text': "Certainly! I'd be happy to request expert assistance for you regarding building an AI agent. To do this, I'll use the human_assistance function to relay your request. Let me do that for you now.", 'type': 'text'}, {'id': 'toolu_01ABUqneqnuHNuo1vhfDFQCW', 'input': {'query': 'A user is requesting expert guidance for building an AI agent. Could you please provide some expert advice or resources on this topic?'}, 'name': 'human_assistance', 'type': 'tool_use'}]
+Tool Calls:
+  human_assistance (toolu_01ABUqneqnuHNuo1vhfDFQCW)
+ Call ID: toolu_01ABUqneqnuHNuo1vhfDFQCW
+  Args:
+    query: A user is requesting expert guidance for building an AI agent. Could you please provide some expert advice or resources on this topic?
+================================= Tool Message =================================
+Name: human_assistance
+
+We, the experts are here to help! We'd recommend you check out LangGraph to build your agent. It's much more reliable and extensible than simple autonomous agents.
+================================== Ai Message ==================================
+
+Thank you for your patience. I've received some expert advice regarding your request for guidance on building an AI agent. Here's what the experts have suggested:
+
+The experts recommend that you look into LangGraph for building your AI agent. They mention that LangGraph is a more reliable and extensible option compared to simple autonomous agents.
+
+LangGraph is likely a framework or library designed specifically for creating AI agents with advanced capabilities. Here are a few points to consider based on this recommendation:
+
+1. Reliability: The experts emphasize that LangGraph is more reliable than simpler autonomous agent approaches. This could mean it has better stability, error handling, or consistent performance.
+
+2. Extensibility: LangGraph is described as more extensible, which suggests that it probably offers a flexible architecture that allows you to easily add new features or modify existing ones as your agent's requirements evolve.
+
+3. Advanced capabilities: Given that it's recommended over "simple autonomous agents," LangGraph likely provides more sophisticated tools and techniques for building complex AI agents.
+...
+2. Look for tutorials or guides specifically focused on building AI agents with LangGraph.
+3. Check if there are any community forums or discussion groups where you can ask questions and get support from other developers using LangGraph.
+
+If you'd like more specific information about LangGraph or have any questions about this recommendation, please feel free to ask, and I can request further assistance from the experts.
+Output is truncated. View as a scrollable element or open in a text editor. Adjust cell output settings...
+
+---
+
+Language: python
+from typing import Annotated
+
+from langchain_tavily import TavilySearch
+from langchain_core.tools import tool
+from typing_extensions import TypedDict
+
+from langgraph.checkpoint.memory import MemorySaver
+from langgraph.graph import StateGraph, START, END
+from langgraph.graph.message import add_messages
+from langgraph.prebuilt import ToolNode, tools_condition
+from langgraph.types import Command, interrupt
+
+class State(TypedDict):
+    messages: Annotated[list, add_messages]
+
+graph_builder = StateGraph(State)
+
+@tool
+def human_assistance(query: str) -> str:
+    """Request assistance from a human."""
+    human_response = interrupt({"query": query})
+    return human_response["data"]
+
+tool = TavilySearch(max_results=2)
+tools = [tool, human_assistance]
+llm_with_tools = llm.bind_tools(tools)
+
+def chatbot(state: State):
+    message = llm_with_tools.invoke(state["messages"])
+    assert(len(message.tool_calls) <= 1)
+    return {"messages": [message]}
+
+graph_builder.add_node("chatbot", chatbot)
+
+tool_node = ToolNode(tools=tools)
+graph_builder.add_node("tools", tool_node)
+
+graph_builder.add_conditional_edges(
+    "chatbot",
+    tools_condition,
+)
+graph_builder.add_edge("tools", "chatbot")
+graph_builder.add_edge(START, "chatbot")
+
+memory = MemorySaver()
+graph = graph_builder.compile(checkpointer=memory)
+
+---
+

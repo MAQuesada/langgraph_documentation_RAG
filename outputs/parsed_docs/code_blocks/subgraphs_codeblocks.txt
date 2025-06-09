@@ -1,0 +1,106 @@
+Language: None
+```python
+from langgraph.graph import StateGraph, MessagesState, START
+
+---
+
+Language: None
+# Subgraph
+
+---
+
+Language: None
+def call_model(state: MessagesState):
+    response = model.invoke(state["messages"])
+    return {"messages": response}
+
+---
+
+Language: None
+subgraph_builder = StateGraph(State)
+subgraph_builder.add_node(call_model)
+...
+# highlight-next-line
+subgraph = subgraph_builder.compile()
+
+---
+
+Language: None
+# Parent graph
+
+---
+
+Language: None
+builder = StateGraph(State)
+# highlight-next-line
+builder.add_node("subgraph_node", subgraph)
+builder.add_edge(START, "subgraph_node")
+graph = builder.compile()
+...
+graph.invoke({"messages": [{"role": "user", "content": "hi!"}]})
+```
+
+---
+
+Language: None
+```python
+from typing_extensions import TypedDict, Annotated
+from langchain_core.messages import AnyMessage
+from langgraph.graph import StateGraph, MessagesState, START
+from langgraph.graph.message import add_messages
+
+---
+
+Language: None
+class SubgraphMessagesState(TypedDict):
+    # highlight-next-line
+    subgraph_messages: Annotated[list[AnyMessage], add_messages]
+
+---
+
+Language: None
+# Subgraph
+
+---
+
+Language: None
+# highlight-next-line
+def call_model(state: SubgraphMessagesState):
+    response = model.invoke(state["subgraph_messages"])
+    return {"subgraph_messages": response}
+
+---
+
+Language: None
+subgraph_builder = StateGraph(State)
+subgraph_builder.add_node(call_model)
+...
+# highlight-next-line
+subgraph = subgraph_builder.compile()
+
+---
+
+Language: None
+# Parent graph
+
+---
+
+Language: None
+def call_subgraph(state: MessagesState):
+    response = subgraph.invoke({"subgraph_messages": state["messages"]})
+    return {"messages": response["subgraph_messages"]}
+
+---
+
+Language: None
+builder = StateGraph(State)
+# highlight-next-line
+builder.add_node("subgraph_node", call_subgraph)
+builder.add_edge(START, "subgraph_node")
+graph = builder.compile()
+...
+graph.invoke({"messages": [{"role": "user", "content": "hi!"}]})
+```
+
+---
+

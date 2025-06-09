@@ -2263,6 +2263,40 @@ docs = ["mdx_gh_links (>=0.2)", "mkdocs (>=1.6)", "mkdocs-gen-files", "mkdocs-li
 testing = ["coverage", "pyyaml"]
 
 [[package]]
+name = "markdown-analysis"
+version = "0.1.5"
+description = ""
+optional = false
+python-versions = "*"
+groups = ["main"]
+files = [
+    {file = "markdown_analysis-0.1.5-py3-none-any.whl", hash = "sha256:0b1058bf44d65f1d508bc53e46113631a98219fa040e6a3221d46d776b7728db"},
+    {file = "markdown_analysis-0.1.5.tar.gz", hash = "sha256:5a2091686011b38b9dd5617fae8e928b768288869fcf11d5f6d61186dc219657"},
+]
+
+[package.dependencies]
+beautifulsoup4 = "*"
+markdownify = "*"
+requests = "*"
+urllib3 = "*"
+
+[[package]]
+name = "markdownify"
+version = "1.1.0"
+description = "Convert HTML to markdown."
+optional = false
+python-versions = "*"
+groups = ["main"]
+files = [
+    {file = "markdownify-1.1.0-py3-none-any.whl", hash = "sha256:32a5a08e9af02c8a6528942224c91b933b4bd2c7d078f9012943776fc313eeef"},
+    {file = "markdownify-1.1.0.tar.gz", hash = "sha256:449c0bbbf1401c5112379619524f33b63490a8fa479456d41de9dc9e37560ebd"},
+]
+
+[package.dependencies]
+beautifulsoup4 = ">=4.9,<5"
+six = ">=1.15,<2"
+
+[[package]]
 name = "markupsafe"
 version = "3.0.2"
 description = "Safely add untrusted strings to HTML/XML markup."
@@ -2399,6 +2433,23 @@ files = [
     {file = "mistune-3.1.3-py3-none-any.whl", hash = "sha256:1a32314113cff28aa6432e99e522677c8587fd83e3d51c29b82a52409c842bd9"},
     {file = "mistune-3.1.3.tar.gz", hash = "sha256:a7035c21782b2becb6be62f8f25d3df81ccb4d6fa477a6525b15af06539f02a0"},
 ]
+
+[[package]]
+name = "mrkdwn-analysis"
+version = "0.1.6"
+description = ""
+optional = false
+python-versions = "*"
+groups = ["main"]
+files = [
+    {file = "mrkdwn_analysis-0.1.6.tar.gz", hash = "sha256:04d74c3fdcf93e1207036eca2939592459cbbbc5b1f9fa9b4e140143f4f48694"},
+]
+
+[package.dependencies]
+beautifulsoup4 = "*"
+markdownify = "*"
+requests = "*"
+urllib3 = "*"
 
 [[package]]
 name = "multidict"
@@ -5257,4 +5308,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12,<4.0"
-content-hash = "17d6355b088d6a9c3eda142e1a2bf9c99eef2660eccaf44ab7dac8999b1fe7c2"
+content-hash = "9cbcb6938f112ed225358c2412a2592070b36f2deadf71518610760e21099668"

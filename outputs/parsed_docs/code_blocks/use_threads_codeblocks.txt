@@ -1,0 +1,475 @@
+Language: None
+- [Threads Overview](../concepts/threads.md)
+
+---
+
+Language: None
+```python
+from langgraph_sdk import get_client
+
+---
+
+Language: None
+client = get_client(url=<DEPLOYMENT_URL>)
+thread = await client.threads.create()
+
+---
+
+Language: None
+print(thread)
+```
+
+---
+
+Language: None
+```js
+import { Client } from "@langchain/langgraph-sdk";
+
+---
+
+Language: None
+const client = new Client({ apiUrl: <DEPLOYMENT_URL> });
+const thread = await client.threads.create();
+
+---
+
+Language: None
+console.log(thread);
+```
+
+---
+
+Language: None
+```bash
+curl --request POST \
+    --url <DEPLOYMENT_URL>/threads \
+    --header 'Content-Type: application/json' \
+    --data '{}'
+```
+
+---
+
+Language: None
+{
+  "thread_id": "123e4567-e89b-12d3-a456-426614174000",
+  "created_at": "2025-05-12T14:04:08.268Z",
+  "updated_at": "2025-05-12T14:04:08.268Z",
+  "metadata": {},
+  "status": "idle",
+  "values": {}
+}
+
+---
+
+Language: None
+```python
+copied_thread = await client.threads.copy(<THREAD_ID>)
+```
+
+---
+
+Language: None
+```js
+const copiedThread = await client.threads.copy(<THREAD_ID>);
+```
+
+---
+
+Language: None
+```bash
+curl --request POST --url <DEPLOYMENT_URL>/threads/<THREAD_ID>/copy \
+--header 'Content-Type: application/json'
+```
+
+---
+
+Language: None
+```python
+from langgraph_sdk import get_client
+
+---
+
+Language: None
+client = get_client(url=<DEPLOYMENT_URL>)
+thread = await client.threads.create(
+  graph_id="agent",
+  supersteps=[
+    {
+      updates: [
+        {
+          values: {},
+          as_node: '__input__',
+        },
+      ],
+    },
+    {
+      updates: [
+        {
+          values: {
+            messages: [
+              {
+                type: 'human',
+                content: 'hello',
+              },
+            ],
+          },
+          as_node: '__start__',
+        },
+      ],
+    },
+    {
+      updates: [
+        {
+          values: {
+            messages: [
+              {
+                content: 'Hello! How can I assist you today?',
+                type: 'ai',
+              },
+            ],
+          },
+          as_node: 'call_model',
+        },
+      ],
+    },
+  ])
+
+---
+
+Language: None
+print(thread)
+```
+
+---
+
+Language: None
+```js
+import { Client } from "@langchain/langgraph-sdk";
+
+---
+
+Language: None
+const client = new Client({ apiUrl: <DEPLOYMENT_URL> });
+const thread = await client.threads.create({
+    graphId: 'agent',
+    supersteps: [
+    {
+      updates: [
+        {
+          values: {},
+          asNode: '__input__',
+        },
+      ],
+    },
+    {
+      updates: [
+        {
+          values: {
+            messages: [
+              {
+                type: 'human',
+                content: 'hello',
+              },
+            ],
+          },
+          asNode: '__start__',
+        },
+      ],
+    },
+    {
+      updates: [
+        {
+          values: {
+            messages: [
+              {
+                content: 'Hello! How can I assist you today?',
+                type: 'ai',
+              },
+            ],
+          },
+          asNode: 'call_model',
+        },
+      ],
+    },
+  ],
+});
+
+---
+
+Language: None
+console.log(thread);
+```
+
+---
+
+Language: None
+```bash
+curl --request POST \
+    --url <DEPLOYMENT_URL>/threads \
+    --header 'Content-Type: application/json' \
+    --data '{"metadata":{"graph_id":"agent"},"supersteps":[{"updates":[{"values":{},"as_node":"__input__"}]},{"updates":[{"values":{"messages":[{"type":"human","content":"hello"}]},"as_node":"__start__"}]},{"updates":[{"values":{"messages":[{"content":"Hello\u0021 How can I assist you today?","type":"ai"}]},"as_node":"call_model"}]}]}'
+```
+
+---
+
+Language: None
+{
+    "thread_id": "f15d70a1-27d4-4793-a897-de5609920b7d",
+    "created_at": "2025-05-12T15:37:08.935038+00:00",
+    "updated_at": "2025-05-12T15:37:08.935046+00:00",
+    "metadata": {"graph_id": "agent"},
+    "status": "idle",
+    "config": {},
+    "values": {
+        "messages": [
+            {
+                "content": "hello",
+                "additional_kwargs": {},
+                "response_metadata": {},
+                "type": "human",
+                "name": null,
+                "id": "8701f3be-959c-4b7c-852f-c2160699b4ab",
+                "example": false
+            },
+            {
+                "content": "Hello! How can I assist you today?",
+                "additional_kwargs": {},
+                "response_metadata": {},
+                "type": "ai",
+                "name": null,
+                "id": "4d8ea561-7ca1-409a-99f7-6b67af3e1aa3",
+                "example": false,
+                "tool_calls": [],
+                "invalid_tool_calls": [],
+                "usage_metadata": null
+            }
+        ]
+    }
+}
+
+---
+
+Language: None
+```python
+print(await client.threads.search(status="idle",limit=1))
+```
+
+---
+
+Language: None
+```js
+console.log(await client.threads.search({ status: "idle", limit: 1 }));
+```
+
+---
+
+Language: None
+```bash
+curl --request POST \
+--url <DEPLOYMENT_URL>/threads/search \
+--header 'Content-Type: application/json' \
+--data '{"status": "idle", "limit": 1}'
+```
+
+---
+
+Language: None
+[
+  {
+    'thread_id': 'cacf79bb-4248-4d01-aabc-938dbd60ed2c',
+    'created_at': '2024-08-14T17:36:38.921660+00:00',
+    'updated_at': '2024-08-14T17:36:38.921660+00:00',
+    'metadata': {'graph_id': 'agent'},
+    'status': 'idle',
+    'config': {'configurable': {}}
+  }
+]
+
+---
+
+Language: None
+```python
+print((await client.threads.search(metadata={"graph_id":"agent"},limit=1)))
+```
+
+---
+
+Language: None
+```js
+console.log((await client.threads.search({ metadata: { "graph_id": "agent" }, limit: 1 })));
+```
+
+---
+
+Language: None
+```bash
+curl --request POST \
+--url <DEPLOYMENT_URL>/threads/search \
+--header 'Content-Type: application/json' \
+--data '{"metadata": {"graph_id":"agent"}, "limit": 1}'
+```
+
+---
+
+Language: None
+[
+  {
+    'thread_id': 'cacf79bb-4248-4d01-aabc-938dbd60ed2c',
+    'created_at': '2024-08-14T17:36:38.921660+00:00',
+    'updated_at': '2024-08-14T17:36:38.921660+00:00',
+    'metadata': {'graph_id': 'agent'},
+    'status': 'idle',
+    'config': {'configurable': {}}
+  }
+]
+
+---
+
+Language: None
+```python
+print((await client.threads.get(<THREAD_ID>)))
+```
+
+---
+
+Language: None
+```js
+console.log((await client.threads.get(<THREAD_ID>)));
+```
+
+---
+
+Language: None
+```bash
+curl --request GET \
+--url <DEPLOYMENT_URL>/threads/<THREAD_ID> \
+--header 'Content-Type: application/json'
+```
+
+---
+
+Language: None
+{
+  'thread_id': 'cacf79bb-4248-4d01-aabc-938dbd60ed2c',
+  'created_at': '2024-08-14T17:36:38.921660+00:00',
+  'updated_at': '2024-08-14T17:36:38.921660+00:00',
+  'metadata': {'graph_id': 'agent'},
+  'status': 'idle',
+  'config': {'configurable': {}}
+}
+
+---
+
+Language: None
+```python
+print((await client.threads.get_state(<THREAD_ID>)))
+```
+
+---
+
+Language: None
+```js
+console.log((await client.threads.getState(<THREAD_ID>)));
+```
+
+---
+
+Language: None
+```bash
+curl --request GET \
+--url <DEPLOYMENT_URL>/threads/<THREAD_ID>/state \
+--header 'Content-Type: application/json'
+```
+
+---
+
+Language: None
+{
+    "values": {
+        "messages": [
+            {
+                "content": "hello",
+                "additional_kwargs": {},
+                "response_metadata": {},
+                "type": "human",
+                "name": null,
+                "id": "8701f3be-959c-4b7c-852f-c2160699b4ab",
+                "example": false
+            },
+            {
+                "content": "Hello! How can I assist you today?",
+                "additional_kwargs": {},
+                "response_metadata": {},
+                "type": "ai",
+                "name": null,
+                "id": "4d8ea561-7ca1-409a-99f7-6b67af3e1aa3",
+                "example": false,
+                "tool_calls": [],
+                "invalid_tool_calls": [],
+                "usage_metadata": null
+            }
+        ]
+    },
+    "next": [],
+    "tasks": [],
+    "metadata": {
+        "thread_id": "f15d70a1-27d4-4793-a897-de5609920b7d",
+        "checkpoint_id": "1f02f46f-7308-616c-8000-1b158a9a6955",
+        "graph_id": "agent_with_quite_a_long_name",
+        "source": "update",
+        "step": 1,
+        "writes": {
+            "call_model": {
+                "messages": [
+                    {
+                        "content": "Hello! How can I assist you today?",
+                        "type": "ai"
+                    }
+                ]
+            }
+        },
+        "parents": {}
+    },
+    "created_at": "2025-05-12T15:37:09.008055+00:00",
+    "checkpoint": {
+        "checkpoint_id": "1f02f46f-733f-6b58-8001-ea90dcabb1bd",
+        "thread_id": "f15d70a1-27d4-4793-a897-de5609920b7d",
+        "checkpoint_ns": ""
+    },
+    "parent_checkpoint": {
+        "checkpoint_id": "1f02f46f-7308-616c-8000-1b158a9a6955",
+        "thread_id": "f15d70a1-27d4-4793-a897-de5609920b7d",
+        "checkpoint_ns": ""
+    },
+    "checkpoint_id": "1f02f46f-733f-6b58-8001-ea90dcabb1bd",
+    "parent_checkpoint_id": "1f02f46f-7308-616c-8000-1b158a9a6955"
+}
+
+---
+
+Language: None
+```python
+thread_state = await client.threads.get_state(
+  thread_id=<THREAD_ID>
+  checkpoint_id=<CHECKPOINT_ID>
+)
+```
+
+---
+
+Language: None
+```js
+const threadState = await client.threads.getState(<THREAD_ID>, <CHECKPOINT_ID>);
+```
+
+---
+
+Language: None
+```bash
+curl --request GET \
+--url <DEPLOYMENT_URL>/threads/<THREAD_ID>/state/<CHECKPOINT_ID> \
+--header 'Content-Type: application/json'
+```
+
+---
+

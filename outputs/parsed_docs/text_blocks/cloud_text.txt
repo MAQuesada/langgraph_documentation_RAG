@@ -1,0 +1,28 @@
+Before deploying, review the [conceptual guide for the Cloud SaaS](../../concepts/langgraph_cloud.md) deployment option.
+
+Starting from the <a href="https://smith.langchain.com/" target="_blank">LangSmith UI</a>...
+
+When [creating a new deployment](#create-new-deployment), a new revision is created by default. Subsequent revisions can be created to deploy new code changes.
+
+Starting from the <a href="https://smith.langchain.com/" target="_blank">LangSmith UI</a>...
+
+Build and server logs are available for each revision.
+
+Starting from the `LangGraph Platform` view...
+
+Interrupting a revision will stop deployment of the revision.
+
+!!! warning "Undefined Behavior"
+    Interrupted revisions have undefined behavior. This is only useful if you need to deploy a new revision and you already have a revision "stuck" in progress. In the future, this feature may be removed.
+
+Starting from the `LangGraph Platform` view...
+
+Starting from the <a href="https://smith.langchain.com/" target="_blank">LangSmith UI</a>...
+
+Starting from the `LangGraph Platform` view...
+
+After installing and authorizing LangChain's `hosted-langserve` GitHub app, repository access for the app can be modified to add new repositories or remove existing repositories. If a new repository is created, it may need to be added explicitly.
+
+All traffic from `LangGraph Platform` deployments created after January 6th 2025 will come through a NAT gateway.
+This NAT gateway will have several static ip addresses depending on the region you are deploying in. Refer to the table below for the list of IP addresses to whitelist:
+

@@ -1,0 +1,45 @@
+Language: bash
+langgraph new --template=new-langgraph-project-python my_new_project
+
+---
+
+Language: python
+# ./src/agent/webapp.py
+from fastapi import FastAPI
+
+# highlight-next-line
+app = FastAPI()
+
+
+@app.get("/hello")
+def read_root():
+    return {"Hello": "World"}
+
+
+---
+
+Language: json
+{
+  "dependencies": ["."],
+  "graphs": {
+    "agent": "./src/agent/graph.py:graph"
+  },
+  "env": ".env",
+  "http": {
+    "app": "./src/agent/webapp.py:app"
+  }
+  // Other configuration options like auth, store, etc.
+}
+
+---
+
+Language: bash
+langgraph dev --no-browser
+
+---
+
+Language: None
+The routes you create in the app are given priority over the system defaults, meaning you can shadow and redefine the behavior of any default endpoint.
+
+---
+

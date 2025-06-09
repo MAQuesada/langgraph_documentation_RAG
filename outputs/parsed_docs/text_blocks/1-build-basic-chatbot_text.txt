@@ -1,0 +1,54 @@
+In this tutorial, you will build a basic chatbot. This chatbot is the basis for the following series of tutorials where you will progressively add more sophisticated capabilities, and be introduced to key LangGraph concepts along the way. Let’s dive in! 🌟
+
+Before you start this tutorial, ensure you have access to a LLM that supports
+tool-calling features, such as [OpenAI](https://platform.openai.com/api-keys),
+[Anthropic](https://console.anthropic.com/settings/keys), or
+[Google Gemini](https://ai.google.dev/gemini-api/docs/api-key).
+
+Install the required packages:
+
+!!! tip
+
+Now you can create a basic chatbot using LangGraph. This chatbot will respond directly to user messages.
+
+Start by creating a `StateGraph`. A `StateGraph` object defines the structure of our chatbot as a "state machine". We'll add `nodes` to represent the llm and functions our chatbot can call and `edges` to specify how the bot should transition between these functions.
+
+Our graph can now handle two key tasks:
+
+!!! tip "Concept"
+
+Next, add a "`chatbot`" node. **Nodes** represent units of work and are typically regular Python functions.
+
+Let's first select a chat model:
+
+{!snippets/chat_model_tabs.md!}
+
+llm = init_chat_model("anthropic:claude-3-5-sonnet-latest")
+
+**Notice** how the `chatbot` node function takes the current `State` as input and returns a dictionary containing an updated `messages` list under the key "messages". This is the basic pattern for all LangGraph node functions.
+
+The `add_messages` function in our `State` will append the LLM's response messages to whatever messages are already in the state.
+
+Add an `entry` point to tell the graph **where to start its work** each time it is run:
+
+Add an `exit` point to indicate **where the graph should finish execution**. This is helpful for more complex flows, but even in a simple graph like this, adding an end node improves clarity.
+
+This tells the graph to terminate after running the chatbot node.
+
+Before running the graph, we'll need to compile it. We can do so by calling `compile()`
+on the graph builder. This creates a `CompiledGraph` we can invoke on our state.
+
+You can visualize the graph using the `get_graph` method and one of the "draw" methods, like `draw_ascii` or `draw_png`. The `draw` methods each require additional dependencies.
+
+![basic chatbot diagram](basic-chatbot.png)
+
+Now run the chatbot!
+
+!!! tip
+
+**Congratulations!** You've built your first chatbot using LangGraph. This bot can engage in basic conversation by taking user input and generating responses using an LLM. You can inspect a [LangSmith Trace](https://smith.langchain.com/public/7527e308-9502-4894-b347-f34385740d5a/r) for the call above.
+
+Below is the full code for this tutorial:
+
+You may have noticed that the bot's knowledge is limited to what's in its training data. In the next part, we'll [add a web search tool](./2-add-tools.md) to expand the bot's knowledge and make it more capable.
+

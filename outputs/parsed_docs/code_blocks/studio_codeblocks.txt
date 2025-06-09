@@ -1,0 +1,65 @@
+Language: None
+```shell
+pip install -U langgraph-cli>=0.2.6
+langgraph dev --tunnel
+```
+
+---
+
+Language: None
+```shell
+# Requires @langchain/langgraph-cli>=0.0.26
+npx @langchain/langgraph-cli dev
+```
+
+---
+
+Language: shell
+https://smith.langchain.com/studio/?baseUrl=https://hamilton-praise-heart-costumes.trycloudflare.com
+
+---
+
+Language: None
+```shell
+pip install -U langgraph-cli>=0.2.6
+langgraph dev --tunnel
+```
+
+---
+
+Language: None
+```shell
+# Requires @langchain/langgraph-cli>=0.0.26
+npx @langchain/langgraph-cli dev
+```
+
+---
+
+Language: shell
+https://smith.langchain.com/studio/?baseUrl=https://hamilton-praise-heart-costumes.trycloudflare.com
+
+---
+
+Language: None
+```python
+graph.add_conditional_edges("node_a", routing_function, {True: "node_b", False: "node_c"})
+```
+
+---
+
+Language: None
+```ts
+graph.addConditionalEdges("node_a", routingFunction, { true: "node_b", false: "node_c" });
+```
+
+---
+
+Language: python
+def routing_function(state: GraphState) -> Literal["node_b","node_c"]:
+    if state['some_condition'] == True:
+        return "node_b"
+    else:
+        return "node_c"
+
+---
+

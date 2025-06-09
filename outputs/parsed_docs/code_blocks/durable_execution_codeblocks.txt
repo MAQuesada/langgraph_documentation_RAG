@@ -1,0 +1,165 @@
+Language: None
+If you are using LangGraph with a checkpointer, you already have durable execution enabled. You can pause and resume workflows at any point, even after interruptions or failures.
+To make the most of durable execution, ensure that your workflow is designed to be [deterministic](#determinism-and-consistent-replay) and [idempotent](#determinism-and-consistent-replay) and wrap any side effects or non-deterministic operations inside [tasks](./functional_api.md#task). You can use [tasks](./functional_api.md#task) from both the [StateGraph (Graph API)](./low_level.md) and the [Functional API](./functional_api.md).
+
+---
+
+Language: None
+```python
+from typing import NotRequired
+from typing_extensions import TypedDict
+import uuid
+
+---
+
+Language: None
+from langgraph.checkpoint.memory import MemorySaver
+from langgraph.graph import StateGraph, START, END
+import requests
+
+---
+
+Language: None
+# Define a TypedDict to represent the state
+class State(TypedDict):
+    url: str
+    result: NotRequired[str]
+
+---
+
+Language: None
+def call_api(state: State):
+    """Example node that makes an API request."""
+    # highlight-next-line
+    result = requests.get(state['url']).text[:100]  # Side-effect
+    return {
+        "result": result
+    }
+
+---
+
+Language: None
+# Create a StateGraph builder and add a node for the call_api function
+builder = StateGraph(State)
+builder.add_node("call_api", call_api)
+
+---
+
+Language: None
+# Connect the start and end nodes to the call_api node
+builder.add_edge(START, "call_api")
+builder.add_edge("call_api", END)
+
+---
+
+Language: None
+# Specify a checkpointer
+checkpointer = MemorySaver()
+
+---
+
+Language: None
+# Compile the graph with the checkpointer
+graph = builder.compile(checkpointer=checkpointer)
+
+---
+
+Language: None
+# Define a config with a thread ID.
+thread_id = uuid.uuid4()
+config = {"configurable": {"thread_id": thread_id}}
+
+---
+
+Language: None
+# Invoke the graph
+graph.invoke({"url": "https://www.example.com"}, config)
+```
+
+---
+
+Language: None
+```python
+from typing import NotRequired
+from typing_extensions import TypedDict
+import uuid
+
+---
+
+Language: None
+from langgraph.checkpoint.memory import MemorySaver
+from langgraph.func import task
+from langgraph.graph import StateGraph, START, END
+import requests
+
+---
+
+Language: None
+# Define a TypedDict to represent the state
+class State(TypedDict):
+    urls: list[str]
+    result: NotRequired[list[str]]
+
+---
+
+Language: None
+@task
+def _make_request(url: str):
+    """Make a request."""
+    # highlight-next-line
+    return requests.get(url).text[:100]
+
+---
+
+Language: None
+def call_api(state: State):
+    """Example node that makes an API request."""
+    # highlight-next-line
+    requests = [_make_request(url) for url in state['urls']]
+    results = [request.result() for request in requests]
+    return {
+        "results": results
+    }
+
+---
+
+Language: None
+# Create a StateGraph builder and add a node for the call_api function
+builder = StateGraph(State)
+builder.add_node("call_api", call_api)
+
+---
+
+Language: None
+# Connect the start and end nodes to the call_api node
+builder.add_edge(START, "call_api")
+builder.add_edge("call_api", END)
+
+---
+
+Language: None
+# Specify a checkpointer
+checkpointer = MemorySaver()
+
+---
+
+Language: None
+# Compile the graph with the checkpointer
+graph = builder.compile(checkpointer=checkpointer)
+
+---
+
+Language: None
+# Define a config with a thread ID.
+thread_id = uuid.uuid4()
+config = {"configurable": {"thread_id": thread_id}}
+
+---
+
+Language: None
+# Invoke the graph
+graph.invoke({"urls": ["https://www.example.com"]}, config)
+```
+
+---
+

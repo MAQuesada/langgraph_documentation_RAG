@@ -1,0 +1,38 @@
+In this tutorial, you will add additional fields to the state to define complex behavior without relying on the message list. The chatbot will use its search tool to find specific information and forward them to a human for review.
+
+!!! note
+
+Update the chatbot to research the birthday of an entity by adding `name` and `birthday` keys to the state:
+
+Adding this information to the state makes it easily accessible by other graph nodes (like a downstream node that stores or processes the information), as well as the graph's persistence layer.
+
+Now, populate the state keys inside of the `human_assistance` tool. This allows a human to review the information before it is stored in the state. Use [`Command`](../../concepts/low_level.md#using-inside-tools) to issue a state update from inside the tool.
+
+The rest of the graph stays the same.
+
+Prompt the chatbot to look up the "birthday" of the LangGraph library and direct the chatbot to reach out to the `human_assistance` tool once it has the required information. By setting `name` and `birthday` in the arguments for the tool, you force the chatbot to generate proposals for these fields.
+
+We've hit the `interrupt` in the `human_assistance` tool again.
+
+The chatbot failed to identify the correct date, so supply it with information:
+
+Note that these fields are now reflected in the state:
+
+This makes them easily accessible to downstream nodes (e.g., a node that further processes or stores the information).
+
+LangGraph gives a high degree of control over the application state. For instance, at any point (including when interrupted), you can manually override a key using `graph.update_state`:
+
+If you call `graph.get_state`, you can see the new value is reflected:
+
+Manual state updates will [generate a trace](https://smith.langchain.com/public/7ebb7827-378d-49fe-9f6c-5df0e90086c8/r) in LangSmith. If desired, they can also be used to [control human-in-the-loop workflows](../../how-tos/human_in_the_loop/edit-graph-state.md). Use of the `interrupt` function is generally recommended instead, as it allows data to be transmitted in a human-in-the-loop interaction independently of state updates.
+
+**Congratulations!** You've added custom keys to the state to facilitate a more complex workflow, and learned how to generate state updates from inside tools.
+
+Check out the code snippet below to review the graph from this tutorial:
+
+{!snippets/chat_model_tabs.md!}
+
+llm = init_chat_model("anthropic:claude-3-5-sonnet-latest")
+
+There's one more concept to review before finishing the LangGraph basics tutorials: connecting `checkpointing` and `state updates` to [time travel](./6-time-travel.md).
+

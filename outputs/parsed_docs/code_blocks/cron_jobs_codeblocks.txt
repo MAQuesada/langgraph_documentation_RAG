@@ -1,0 +1,186 @@
+Language: None
+```python
+from langgraph_sdk import get_client
+
+---
+
+Language: None
+client = get_client(url=<DEPLOYMENT_URL>)
+# Using the graph deployed with the name "agent"
+assistant_id = "agent"
+# create thread
+thread = await client.threads.create()
+print(thread)
+```
+
+---
+
+Language: None
+```js
+import { Client } from "@langchain/langgraph-sdk";
+
+---
+
+Language: None
+const client = new Client({ apiUrl: <DEPLOYMENT_URL> });
+// Using the graph deployed with the name "agent"
+const assistantId = "agent";
+// create thread
+const thread = await client.threads.create();
+console.log(thread);
+```
+
+---
+
+Language: None
+```bash
+curl --request POST \
+    --url <DEPLOYMENT_URL>/assistants/search \
+    --header 'Content-Type: application/json' \
+    --data '{
+        "limit": 10,
+        "offset": 0
+    }' | jq -c 'map(select(.config == null or .config == {})) | .[0].graph_id' && \
+curl --request POST \
+    --url <DEPLOYMENT_URL>/threads \
+    --header 'Content-Type: application/json' \
+    --data '{}'
+```
+
+---
+
+Language: None
+{
+    'thread_id': '9dde5490-2b67-47c8-aa14-4bfec88af217', 
+    'created_at': '2024-08-30T23:07:38.242730+00:00', 
+    'updated_at': '2024-08-30T23:07:38.242730+00:00', 
+    'metadata': {}, 
+    'status': 'idle', 
+    'config': {}, 
+    'values': None
+}
+
+---
+
+Language: None
+```python
+# This schedules a job to run at 15:27 (3:27PM) every day
+cron_job = await client.crons.create_for_thread(
+    thread["thread_id"],
+    assistant_id,
+    schedule="27 15 * * *",
+    input={"messages": [{"role": "user", "content": "What time is it?"}]},
+)
+```
+
+---
+
+Language: None
+```js
+// This schedules a job to run at 15:27 (3:27PM) every day
+const cronJob = await client.crons.create_for_thread(
+  thread["thread_id"],
+  assistantId,
+  {
+    schedule: "27 15 * * *",
+    input: { messages: [{ role: "user", content: "What time is it?" }] }
+  }
+);
+```
+
+---
+
+Language: None
+```bash
+curl --request POST \
+    --url <DEPLOYMENT_URL>/threads/<THREAD_ID>/runs/crons \
+    --header 'Content-Type: application/json' \
+    --data '{
+        "assistant_id": <ASSISTANT_ID>,
+    }'
+```
+
+---
+
+Language: None
+```python
+await client.crons.delete(cron_job["cron_id"])
+```
+
+---
+
+Language: None
+```js
+await client.crons.delete(cronJob["cron_id"]);
+```
+
+---
+
+Language: None
+```bash
+curl --request DELETE \
+    --url <DEPLOYMENT_URL>/runs/crons/<CRON_ID>
+```
+
+---
+
+Language: None
+```python
+# This schedules a job to run at 15:27 (3:27PM) every day
+cron_job_stateless = await client.crons.create(
+    assistant_id,
+    schedule="27 15 * * *",
+    input={"messages": [{"role": "user", "content": "What time is it?"}]},
+)
+```
+
+---
+
+Language: None
+```js
+// This schedules a job to run at 15:27 (3:27PM) every day
+const cronJobStateless = await client.crons.create(
+  assistantId,
+  {
+    schedule: "27 15 * * *",
+    input: { messages: [{ role: "user", content: "What time is it?" }] }
+  }
+);
+```
+
+---
+
+Language: None
+```bash
+curl --request POST \
+    --url <DEPLOYMENT_URL>/runs/crons \
+    --header 'Content-Type: application/json' \
+    --data '{
+        "assistant_id": <ASSISTANT_ID>,
+    }'
+```
+
+---
+
+Language: None
+```python
+await client.crons.delete(cron_job_stateless["cron_id"])
+```
+
+---
+
+Language: None
+```js
+await client.crons.delete(cronJobStateless["cron_id"]);
+```
+
+---
+
+Language: None
+```bash
+curl --request DELETE \
+    --url <DEPLOYMENT_URL>/runs/crons/<CRON_ID>
+```
+
+---
+

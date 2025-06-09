@@ -1,0 +1,644 @@
+Language: python
+from langgraph.checkpoint.memory import MemorySaver
+from langgraph.func import entrypoint, task
+from langgraph.types import interrupt
+
+
+@task
+def write_essay(topic: str) -> str:
+    """Write an essay about the given topic."""
+    time.sleep(1) # A placeholder for a long-running task.
+    return f"An essay about topic: {topic}"
+
+@entrypoint(checkpointer=MemorySaver())
+def workflow(topic: str) -> dict:
+    """A simple workflow that writes an essay and asks for a review."""
+    essay = write_essay("cat").result()
+    is_approved = interrupt({
+        # Any json-serializable payload provided to interrupt as argument.
+        # It will be surfaced on the client side as an Interrupt when streaming data
+        # from the workflow.
+        "essay": essay, # The essay we want reviewed.
+        # We can add any additional information that we need.
+        # For example, introduce a key called "action" with some instructions.
+        "action": "Please approve/reject the essay",
+    })
+
+    return {
+        "essay": essay, # The essay that was generated
+        "is_approved": is_approved, # Response from HIL
+    }
+
+---
+
+Language: None
+This workflow will write an essay about the topic "cat" and then pause to get a review from a human. The workflow can be interrupted for an indefinite amount of time until a review is provided.
+
+---
+
+Language: None
+When the workflow is resumed, it executes from the very start, but because the result of the `write_essay` task was already saved, the task result will be loaded from the checkpoint instead of being recomputed.
+
+---
+
+Language: None
+```python
+import time
+import uuid
+
+---
+
+Language: None
+from langgraph.func import entrypoint, task
+from langgraph.types import interrupt
+from langgraph.checkpoint.memory import MemorySaver
+
+---
+
+Language: None
+@task
+def write_essay(topic: str) -> str:
+    """Write an essay about the given topic."""
+    time.sleep(1) # This is a placeholder for a long-running task.
+    return f"An essay about topic: {topic}"
+
+---
+
+Language: None
+@entrypoint(checkpointer=MemorySaver())
+def workflow(topic: str) -> dict:
+    """A simple workflow that writes an essay and asks for a review."""
+    essay = write_essay("cat").result()
+    is_approved = interrupt({
+        # Any json-serializable payload provided to interrupt as argument.
+        # It will be surfaced on the client side as an Interrupt when streaming data
+        # from the workflow.
+        "essay": essay, # The essay we want reviewed.
+        # We can add any additional information that we need.
+        # For example, introduce a key called "action" with some instructions.
+        "action": "Please approve/reject the essay",
+    })
+
+---
+
+Language: None
+    return {
+        "essay": essay, # The essay that was generated
+        "is_approved": is_approved, # Response from HIL
+    }
+
+---
+
+Language: None
+thread_id = str(uuid.uuid4())
+
+---
+
+Language: None
+config = {
+    "configurable": {
+        "thread_id": thread_id
+    }
+}
+
+---
+
+Language: None
+for item in workflow.stream("cat", config):
+    print(item)
+```
+
+---
+
+Language: None
+```pycon
+{'write_essay': 'An essay about topic: cat'}
+{'__interrupt__': (Interrupt(value={'essay': 'An essay about topic: cat', 'action': 'Please approve/reject the essay'}, resumable=True, ns=['workflow:f7b8508b-21c0-8b4c-5958-4e8de74d2684'], when='during'),)}
+```
+
+---
+
+Language: None
+An essay has been written and is ready for review. Once the review is provided, we can resume the workflow:
+
+---
+
+Language: None
+```python
+from langgraph.types import Command
+
+---
+
+Language: None
+# Get review from a user (e.g., via a UI)
+# In this case, we're using a bool, but this can be any json-serializable value.
+human_review = True
+
+---
+
+Language: None
+for item in workflow.stream(Command(resume=human_review), config):
+    print(item)
+```
+
+---
+
+Language: None
+```pycon
+{'workflow': {'essay': 'An essay about topic: cat', 'is_approved': False}}
+```
+
+---
+
+Language: None
+The workflow has been completed and the review has been added to the essay.
+
+---
+
+Language: None
+```python
+from langgraph.func import entrypoint
+
+---
+
+Language: None
+@entrypoint(checkpointer=checkpointer)
+def my_workflow(some_input: dict) -> int:
+    # some logic that may involve long-running tasks like API calls,
+    # and may be interrupted for human-in-the-loop.
+    ...
+    return result
+```
+
+---
+
+Language: None
+```python
+from langgraph.func import entrypoint
+
+---
+
+Language: None
+@entrypoint(checkpointer=checkpointer)
+async def my_workflow(some_input: dict) -> int:
+    # some logic that may involve long-running tasks like API calls,
+    # and may be interrupted for human-in-the-loop
+    ...
+    return result 
+```
+
+---
+
+Language: None
+The **inputs** and **outputs** of entrypoints must be JSON-serializable to support checkpointing. Please see the [serialization](#serialization) section for more details.
+
+---
+
+Language: None
+Declare the parameters with the appropriate name and type annotation.
+
+---
+
+Language: None
+```python
+from langchain_core.runnables import RunnableConfig
+from langgraph.func import entrypoint
+from langgraph.store.base import BaseStore
+from langgraph.store.memory import InMemoryStore
+
+---
+
+Language: None
+in_memory_store = InMemoryStore(...)  # An instance of InMemoryStore for long-term memory
+
+---
+
+Language: None
+@entrypoint(
+    checkpointer=checkpointer,  # Specify the checkpointer
+    store=in_memory_store  # Specify the store
+)  
+def my_workflow(
+    some_input: dict,  # The input (e.g., passed via `invoke`)
+    *,
+    previous: Any = None, # For short-term memory
+    store: BaseStore,  # For long-term memory
+    writer: StreamWriter,  # For streaming custom data
+    config: RunnableConfig  # For accessing the configuration passed to the entrypoint
+) -> ...:
+```
+
+---
+
+Language: None
+```python
+config = {
+    "configurable": {
+        "thread_id": "some_thread_id"
+    }
+}
+my_workflow.invoke(some_input, config)  # Wait for the result synchronously
+```
+
+---
+
+Language: None
+```python
+config = {
+    "configurable": {
+        "thread_id": "some_thread_id"
+    }
+}
+await my_workflow.ainvoke(some_input, config)  # Await result asynchronously
+```
+
+---
+
+Language: None
+```python
+config = {
+    "configurable": {
+        "thread_id": "some_thread_id"
+    }
+}
+
+---
+
+Language: None
+for chunk in my_workflow.stream(some_input, config):
+    print(chunk)
+```
+
+---
+
+Language: None
+```python
+config = {
+    "configurable": {
+        "thread_id": "some_thread_id"
+    }
+}
+
+---
+
+Language: None
+async for chunk in my_workflow.astream(some_input, config):
+    print(chunk)
+```
+
+---
+
+Language: None
+```python
+from langgraph.types import Command
+
+---
+
+Language: None
+config = {
+    "configurable": {
+        "thread_id": "some_thread_id"
+    }
+}
+
+my_workflow.invoke(Command(resume=some_resume_value), config)
+```
+
+---
+
+Language: None
+```python
+from langgraph.types import Command
+
+---
+
+Language: None
+config = {
+    "configurable": {
+        "thread_id": "some_thread_id"
+    }
+}
+
+await my_workflow.ainvoke(Command(resume=some_resume_value), config)
+```
+
+---
+
+Language: None
+```python
+from langgraph.types import Command
+
+---
+
+Language: None
+config = {
+    "configurable": {
+        "thread_id": "some_thread_id"
+    }
+}
+
+for chunk in my_workflow.stream(Command(resume=some_resume_value), config):
+    print(chunk)
+```
+
+---
+
+Language: None
+```python
+from langgraph.types import Command
+
+---
+
+Language: None
+config = {
+    "configurable": {
+        "thread_id": "some_thread_id"
+    }
+}
+
+---
+
+Language: None
+async for chunk in my_workflow.astream(Command(resume=some_resume_value), config):
+    print(chunk)
+```
+
+---
+
+Language: None
+```python
+
+---
+
+Language: None
+config = {
+    "configurable": {
+        "thread_id": "some_thread_id"
+    }
+}
+
+my_workflow.invoke(None, config)
+```
+
+---
+
+Language: None
+```python
+
+---
+
+Language: None
+config = {
+    "configurable": {
+        "thread_id": "some_thread_id"
+    }
+}
+
+await my_workflow.ainvoke(None, config)
+```
+
+---
+
+Language: None
+```python
+
+---
+
+Language: None
+config = {
+    "configurable": {
+        "thread_id": "some_thread_id"
+    }
+}
+
+for chunk in my_workflow.stream(None, config):
+    print(chunk)
+```
+
+---
+
+Language: None
+```python
+
+---
+
+Language: None
+config = {
+    "configurable": {
+        "thread_id": "some_thread_id"
+    }
+}
+
+---
+
+Language: None
+async for chunk in my_workflow.astream(None, config):
+    print(chunk)
+```
+
+---
+
+Language: python
+@entrypoint(checkpointer=checkpointer)
+def my_workflow(number: int, *, previous: Any = None) -> int:
+    previous = previous or 0
+    return number + previous
+
+config = {
+    "configurable": {
+        "thread_id": "some_thread_id"
+    }
+}
+
+my_workflow.invoke(1, config)  # 1 (previous was None)
+my_workflow.invoke(2, config)  # 3 (previous was 1 from the previous invocation)
+
+---
+
+Language: python
+@entrypoint(checkpointer=checkpointer)
+def my_workflow(number: int, *, previous: Any = None) -> entrypoint.final[int, int]:
+    previous = previous or 0
+    # This will return the previous value to the caller, saving
+    # 2 * number to the checkpoint, which will be used in the next invocation 
+    # for the `previous` parameter.
+    return entrypoint.final(value=previous, save=2 * number)
+
+config = {
+    "configurable": {
+        "thread_id": "1"
+    }
+}
+
+my_workflow.invoke(3, config)  # 0 (previous was None)
+my_workflow.invoke(1, config)  # 6 (previous was 3 * 2 from the previous invocation)
+
+---
+
+Language: python
+from langgraph.func import task
+
+@task()
+def slow_computation(input_value):
+    # Simulate a long-running operation
+    ...
+    return result
+
+---
+
+Language: None
+The **outputs** of tasks must be JSON-serializable to support checkpointing.
+
+---
+
+Language: None
+```python
+@entrypoint(checkpointer=checkpointer)
+def my_workflow(some_input: int) -> int:
+    future = slow_computation(some_input)
+    return future.result()  # Wait for the result synchronously
+```
+
+---
+
+Language: None
+```python
+@entrypoint(checkpointer=checkpointer)
+async def my_workflow(some_input: int) -> int:
+    return await slow_computation(some_input)  # Await result asynchronously
+```
+
+---
+
+Language: None
+In this example, a side effect (writing to a file) is directly included in the workflow, so it will be executed a second time when resuming the workflow.
+
+---
+
+Language: None
+```python
+@entrypoint(checkpointer=checkpointer)
+def my_workflow(inputs: dict) -> int:
+    # This code will be executed a second time when resuming the workflow.
+    # Which is likely not what you want.
+    # highlight-next-line
+    with open("output.txt", "w") as f:
+        # highlight-next-line
+        f.write("Side effect executed")
+    value = interrupt("question")
+    return value
+```
+
+---
+
+Language: None
+In this example, the side effect is encapsulated in a task, ensuring consistent execution upon resumption.
+
+---
+
+Language: None
+```python
+from langgraph.func import task
+
+---
+
+Language: None
+# highlight-next-line
+@task
+# highlight-next-line
+def write_to_file():
+    with open("output.txt", "w") as f:
+        f.write("Side effect executed")
+
+---
+
+Language: None
+@entrypoint(checkpointer=checkpointer)
+def my_workflow(inputs: dict) -> int:
+    # The side effect is now encapsulated in a task.
+    write_to_file().result()
+    value = interrupt("question")
+    return value
+```
+
+---
+
+Language: None
+```python
+from langgraph.func import entrypoint
+
+---
+
+Language: None
+@entrypoint(checkpointer=checkpointer)
+def my_workflow(inputs: dict) -> int:
+    t0 = inputs["t0"]
+    # highlight-next-line
+    t1 = time.time()
+    
+    delta_t = t1 - t0
+    
+    if delta_t > 1:
+        result = slow_task(1).result()
+        value = interrupt("question")
+    else:
+        result = slow_task(2).result()
+        value = interrupt("question")
+        
+    return {
+        "result": result,
+        "value": value
+    }
+```
+
+---
+
+Language: None
+In this example, the workflow uses the input `t0` to determine which task to execute. This is deterministic because the result of the workflow depends only on the input.
+
+---
+
+Language: None
+```python
+import time
+
+---
+
+Language: None
+from langgraph.func import task
+
+---
+
+Language: None
+# highlight-next-line
+@task
+# highlight-next-line
+def get_time() -> float:
+    return time.time()
+
+---
+
+Language: None
+@entrypoint(checkpointer=checkpointer)
+def my_workflow(inputs: dict) -> int:
+    t0 = inputs["t0"]
+    # highlight-next-line
+    t1 = get_time().result()
+    
+    delta_t = t1 - t0
+    
+    if delta_t > 1:
+        result = slow_task(1).result()
+        value = interrupt("question")
+    else:
+        result = slow_task(2).result()
+        value = interrupt("question")
+        
+    return {
+        "result": result,
+        "value": value
+    }
+```
+
+---
+

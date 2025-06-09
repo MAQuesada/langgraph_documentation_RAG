@@ -1,0 +1,202 @@
+Language: python
+agent.invoke(
+    {"messages": [{"role": "user", "content": "hi!"}]},
+    # highlight-next-line
+    config={"configurable": {"user_id": "user_123"}}
+)
+
+---
+
+Language: python
+class CustomState(AgentState):
+    # highlight-next-line
+    user_name: str
+
+agent = create_react_agent(
+    # Other agent parameters...
+    # highlight-next-line
+    state_schema=CustomState,
+)
+
+agent.invoke({
+    "messages": "hi!",
+    "user_name": "Jane"
+})
+
+---
+
+Language: None
+Please see the [memory guide](./memory.md) for more details on how to enable memory. This is a powerful feature that allows you to persist the agent's state across multiple invocations.
+Otherwise, the state is scoped only to a single agent run.
+
+---
+
+Language: None
+```python
+from langchain_core.messages import AnyMessage
+from langchain_core.runnables import RunnableConfig
+from langgraph.prebuilt import create_react_agent
+from langgraph.prebuilt.chat_agent_executor import AgentState
+
+---
+
+Language: None
+def prompt(
+    state: AgentState,
+    # highlight-next-line
+    config: RunnableConfig,
+) -> list[AnyMessage]:
+    # highlight-next-line
+    user_name = config["configurable"].get("user_name")
+    system_msg = f"You are a helpful assistant. User's name is {user_name}"
+    return [{"role": "system", "content": system_msg}] + state["messages"]
+
+---
+
+Language: None
+agent = create_react_agent(
+    model="anthropic:claude-3-7-sonnet-latest",
+    tools=[get_weather],
+    # highlight-next-line
+    prompt=prompt
+)
+
+---
+
+Language: None
+agent.invoke(
+    ...,
+    # highlight-next-line
+    config={"configurable": {"user_name": "John Smith"}}
+)
+```
+
+---
+
+Language: None
+```python
+from langchain_core.messages import AnyMessage
+from langchain_core.runnables import RunnableConfig
+from langgraph.prebuilt import create_react_agent
+from langgraph.prebuilt.chat_agent_executor import AgentState
+
+---
+
+Language: None
+class CustomState(AgentState):
+    # highlight-next-line
+    user_name: str
+
+---
+
+Language: None
+def prompt(
+    # highlight-next-line
+    state: CustomState
+) -> list[AnyMessage]:
+    # highlight-next-line
+    user_name = state["user_name"]
+    system_msg = f"You are a helpful assistant. User's name is {user_name}"
+    return [{"role": "system", "content": system_msg}] + state["messages"]
+
+---
+
+Language: None
+agent = create_react_agent(
+    model="anthropic:claude-3-7-sonnet-latest",
+    tools=[...],
+    # highlight-next-line
+    state_schema=CustomState,
+    # highlight-next-line
+    prompt=prompt
+)
+
+---
+
+Language: None
+agent.invoke({
+    "messages": "hi!",
+    # highlight-next-line
+    "user_name": "John Smith"
+})
+```
+
+---
+
+Language: None
+```python
+def get_user_info(
+    # highlight-next-line
+    config: RunnableConfig,
+) -> str:
+    """Look up user info."""
+    # highlight-next-line
+    user_id = config["configurable"].get("user_id")
+    return "User is John Smith" if user_id == "user_123" else "Unknown user"
+
+---
+
+Language: None
+agent = create_react_agent(
+    model="anthropic:claude-3-7-sonnet-latest",
+    tools=[get_user_info],
+)
+
+---
+
+Language: None
+agent.invoke(
+    {"messages": [{"role": "user", "content": "look up user information"}]},
+    # highlight-next-line
+    config={"configurable": {"user_id": "user_123"}}
+)
+```
+
+---
+
+Language: None
+```python
+from typing import Annotated
+from langgraph.prebuilt import InjectedState
+
+---
+
+Language: None
+class CustomState(AgentState):
+    # highlight-next-line
+    user_id: str
+
+---
+
+Language: None
+def get_user_info(
+    # highlight-next-line
+    state: Annotated[CustomState, InjectedState]
+) -> str:
+    """Look up user info."""
+    # highlight-next-line
+    user_id = state["user_id"]
+    return "User is John Smith" if user_id == "user_123" else "Unknown user"
+
+---
+
+Language: None
+agent = create_react_agent(
+    model="anthropic:claude-3-7-sonnet-latest",
+    tools=[get_user_info],
+    # highlight-next-line
+    state_schema=CustomState,
+)
+
+---
+
+Language: None
+agent.invoke({
+    "messages": "look up user information",
+    # highlight-next-line
+    "user_id": "user_123"
+})
+```
+
+---
+

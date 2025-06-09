@@ -1,0 +1,71 @@
+This guide covers how to kick off background runs for your agent.
+This can be useful for long running jobs.
+
+First let's set up our client and thread:
+
+=== "Python"
+
+=== "Javascript"
+
+=== "CURL"
+
+Output:
+
+If we list the current runs on this thread, we will see that it's empty:
+
+=== "Python"
+
+=== "Javascript"
+
+=== "CURL"
+
+Output:
+
+Now let's kick off a run:
+
+=== "Python"
+
+=== "Javascript"
+
+=== "CURL"
+
+The first time we poll it, we can see `status=pending`:
+
+=== "Python"
+
+=== "Javascript"
+
+=== "CURL"
+
+Output:
+
+Now we can join the run, wait for it to finish and check that status again:
+
+=== "Python"
+
+=== "Javascript"
+
+=== "CURL"
+
+Output:
+
+Perfect! The run succeeded as we would expect. We can double check that the run worked as expected by printing out the final state:
+
+=== "Python"
+
+=== "Javascript"
+
+=== "CURL"
+
+Output:
+
+We can also just print the content of the last AIMessage:
+
+=== "Python"
+
+=== "Javascript"
+
+=== "CURL"
+
+Output:
+

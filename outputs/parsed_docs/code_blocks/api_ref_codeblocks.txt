@@ -1,0 +1,13 @@
+Language: shell
+curl --request POST \
+  --url http://localhost:8124/assistants/search \
+  --header 'Content-Type: application/json' \
+  --header 'X-Api-Key: LANGSMITH_API_KEY' \
+  --data '{
+  "metadata": {},
+  "limit": 10,
+  "offset": 0
+}'  
+
+---
+

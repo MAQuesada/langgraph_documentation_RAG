@@ -1,0 +1,275 @@
+Language: None
+```python
+from typing_extensions import TypedDict, NotRequired
+from langgraph.graph import StateGraph, START, END
+from langchain.chat_models import init_chat_model
+from langgraph.checkpoint.memory import InMemorySaver
+
+---
+
+Language: None
+class State(TypedDict):
+    topic: NotRequired[str]
+    joke: NotRequired[str]
+
+---
+
+Language: None
+llm = init_chat_model(
+    "anthropic:claude-3-7-sonnet-latest",
+    temperature=0,
+)
+
+---
+
+Language: None
+def generate_topic(state: State):
+    """LLM call to generate a topic for the joke"""
+    msg = llm.invoke("Give me a funny topic for a joke")
+    return {"topic": msg.content}
+
+---
+
+Language: None
+def write_joke(state: State):
+    """LLM call to write a joke based on the topic"""
+    msg = llm.invoke(f"Write a short joke about {state['topic']}")
+    return {"joke": msg.content}
+
+---
+
+Language: None
+# Build workflow
+builder = StateGraph(State)
+
+---
+
+Language: None
+# Add nodes
+builder.add_node("generate_topic", generate_topic)
+builder.add_node("write_joke", write_joke)
+
+---
+
+Language: None
+# Add edges to connect nodes
+builder.add_edge(START, "generate_topic")
+builder.add_edge("generate_topic", "write_joke")
+
+---
+
+Language: None
+# Compile
+graph = builder.compile()
+```
+
+---
+
+Language: None
+```python
+from langgraph_sdk import get_client
+client = get_client(url=<DEPLOYMENT_URL>)
+
+---
+
+Language: None
+# Using the graph deployed with the name "agent"
+assistant_id = "agent"
+
+---
+
+Language: None
+# create a thread
+thread = await client.threads.create()
+thread_id = thread["thread_id"]
+
+---
+
+Language: None
+# Run the graph
+result = await client.runs.wait(
+    thread_id,
+    assistant_id,
+    input={}
+)
+```
+
+---
+
+Language: None
+```js
+import { Client } from "@langchain/langgraph-sdk";
+const client = new Client({ apiUrl: <DEPLOYMENT_URL> });
+
+---
+
+Language: None
+// Using the graph deployed with the name "agent"
+const assistantID = "agent";
+
+---
+
+Language: None
+// create a thread
+const thread = await client.threads.create();
+const threadID = thread["thread_id"];
+
+---
+
+Language: None
+// Run the graph
+const result = await client.runs.wait(
+  threadID,
+  assistantID,
+  { input: {}}
+);
+```
+
+---
+
+Language: None
+Create a thread:
+
+---
+
+Language: None
+```bash
+curl --request POST \
+--url <DEPLOYMENT_URL>/threads \
+--header 'Content-Type: application/json' \
+--data '{}'
+```
+
+---
+
+Language: None
+Run the graph:
+
+---
+
+Language: None
+```bash
+curl --request POST \
+--url <DEPLOYMENT_URL>/threads/<THREAD_ID>/runs/wait \
+--header 'Content-Type: application/json' \
+--data "{
+  \"assistant_id\": \"agent\",
+  \"input\": {}
+}"
+```
+
+---
+
+Language: None
+```python
+# The states are returned in reverse chronological order.
+states = await client.threads.get_history(thread_id)
+selected_state = states[1]
+print(selected_state)
+```
+
+---
+
+Language: None
+```js
+// The states are returned in reverse chronological order.
+const states = await client.threads.getHistory(threadID);
+const selectedState = states[1];
+console.log(selectedState);
+```
+
+---
+
+Language: None
+```bash
+curl --request GET \
+--url <DEPLOYMENT_URL>/threads/<THREAD_ID>/history \
+--header 'Content-Type: application/json'
+```
+
+---
+
+Language: None
+```python
+new_config = await client.threads.update_state(
+    thread_id,
+    {"topic": "chickens"},
+    # highlight-next-line
+    checkpoint_id=selected_state["checkpoint_id"]
+)
+print(new_config)
+```
+
+---
+
+Language: None
+```js
+const newConfig = await client.threads.updateState(
+  threadID,
+  {
+    values: { "topic": "chickens" },
+    checkpointId: selectedState["checkpoint_id"]
+  }
+);
+console.log(newConfig);
+```
+
+---
+
+Language: None
+```bash
+curl --request POST \
+--url <DEPLOYMENT_URL>/threads/<THREAD_ID>/state \
+--header 'Content-Type: application/json' \
+--data "{
+  \"assistant_id\": \"agent\",
+  \"checkpoint_id\": <CHECKPOINT_ID>,
+  \"values\": {\"topic\": \"chickens\"}
+}"
+```
+
+---
+
+Language: None
+```python
+await client.runs.wait(
+    thread_id,
+    assistant_id,
+    # highlight-next-line
+    input=None,
+    # highlight-next-line
+    checkpoint_id=new_config["checkpoint_id"]
+)
+```
+
+---
+
+Language: None
+```js
+await client.runs.wait(
+  threadID,
+  assistantID,
+  {
+    // highlight-next-line
+    input: null,
+    // highlight-next-line
+    checkpointId: newConfig["checkpoint_id"]
+  }
+);
+```
+
+---
+
+Language: None
+```bash
+curl --request POST \
+--url <DEPLOYMENT_URL>/threads/<THREAD_ID>/runs/wait \
+--header 'Content-Type: application/json' \
+--data "{
+  \"assistant_id\": \"agent\",
+  \"checkpoint_id\": <CHECKPOINT_ID>
+}"
+```
+
+---
+

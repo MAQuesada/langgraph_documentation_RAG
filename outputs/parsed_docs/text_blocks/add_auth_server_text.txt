@@ -1,0 +1,31 @@
+In [the last tutorial](resource_auth.md), you added [resource authorization](../../tutorials/auth/resource_auth.md) to give users private conversations. However, you are still using hard-coded tokens for authentication, which is not secure. Now you'll replace those tokens with real user accounts using [OAuth2](../auth/getting_started.md).
+
+You'll keep the same [`Auth`](../../cloud/reference/sdk/python_sdk_ref.md#langgraph_sdk.auth.Auth) object and [resource-level access control](../../concepts/auth.md#single-owner-resources), but upgrade authentication to use Supabase as your identity provider. While Supabase is used in this tutorial, the concepts apply to any OAuth2 provider. You'll learn how to:
+
+OAuth2 involves three main roles:
+
+Before you start this tutorial, ensure you have:
+
+Install the required dependencies. Start in your `custom-auth` directory and ensure you have the `langgraph-cli` installed:
+
+Next, fetch the URL of your auth server and the private key for authentication.
+Since you're using Supabase for this, you can do this in the Supabase dashboard:
+
+In the previous tutorials, you used the [`Auth`](../../cloud/reference/sdk/python_sdk_ref.md#langgraph_sdk.auth.Auth) object to [validate hard-coded tokens](getting_started.md) and [add resource ownership](resource_auth.md).
+
+Now you'll upgrade your authentication to validate real JWT tokens from Supabase. The main changes will all be in the [`@auth.authenticate`](../../cloud/reference/sdk/python_sdk_ref.md#langgraph_sdk.auth.Auth.authenticate) decorated function:
+
+The most important change is that we're now validating tokens with a real authentication server. Our authentication handler has the private key for our Supabase project, which we can use to validate the user's token and extract their information.
+
+Let's test out the new authentication flow. You can run the following code in a file or notebook. You will need to provide:
+
+⚠️ Before continuing: Check your email and click both confirmation links. Supabase will reject `/login` requests until after you have confirmed your users' email.
+
+Now test that users can only see their own data. Make sure the server is running (run `langgraph dev`) before proceeding. The following snippet requires the "anon public" key that you copied from the Supabase dashboard while [setting up the auth provider](#setup-auth-provider) previously.
+
+The output should look like this:
+
+Your authentication and authorization are working together:
+
+You've successfully built a production-ready authentication system for your LangGraph application! Let's review what you've accomplished:
+

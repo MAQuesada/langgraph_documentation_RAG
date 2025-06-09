@@ -1,0 +1,76 @@
+!!! tip "Prerequisites"
+
+Human-in-the-loop (HIL) interactions are crucial for [agentic systems](../../concepts/agentic_concepts.md). A common pattern is to add some human in the loop step after certain tool calls. These tool calls often lead to either a function call or saving of some information. Examples include:
+
+We are not going to show the full code for the graph we are hosting, but you can see it [here](../../how-tos/human_in_the_loop/review-tool-calls.ipynb). Once this graph is hosted, we are ready to invoke it and wait for user input.
+
+First, we need to setup our client so that we can communicate with our hosted graph:
+
+=== "Python"
+
+=== "Javascript"
+
+=== "cURL"
+
+First, let's run the agent with an input that requires tool calls with approval:
+
+=== "Python"
+
+=== "Javascript"
+
+=== "cURL"
+
+Output:
+
+To approve the tool call, we need to let `human_review_node` know what value to use for the `human_review` variable we defined inside the node. We can provide this value by invoking the graph with a `Command(resume=<human_review>)` input.  Since we're approving the tool call, we'll provide `resume` value of `{"action": "continue"}` to navigate to `run_tool` node:
+
+=== "Python"
+
+=== "Javascript"
+
+=== "cURL"
+
+Output:
+
+Let's now say we want to edit the tool call. E.g. change some of the parameters (or even the tool called!) but then execute that tool.
+
+=== "Python"
+
+=== "Javascript"
+
+=== "cURL"
+
+To do this, we will use `Command` with a different resume value of `{"action": "update", "data": <tool call args>}`. This will do the following:
+
+=== "Javascript"
+
+=== "cURL"
+
+Output:
+
+Sometimes, you may not want to execute a tool call, but you also may not want to ask the user to manually modify the tool call. In that case it may be better to get natural language feedback from the user. You can then insert this feedback as a mock **RESULT** of the tool call.
+
+There are multiple ways to do this:
+
+=== "Javascript"
+
+=== "cURL"
+
+To do this, we will use `Command` with a different resume value of `{"action": "feedback", "data": <feedback string>}`. This will do the following:
+
+=== "Javascript"
+
+=== "cURL"
+
+Output:
+
+We can see that we now get to another interrupt - because it went back to the model and got an entirely new prediction of what to call. Let's now approve this one and continue.
+
+=== "Python"
+
+=== "Javascript"
+
+=== "cURL"
+
+Output:
+

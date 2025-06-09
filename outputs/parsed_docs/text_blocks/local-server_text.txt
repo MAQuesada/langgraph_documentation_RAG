@@ -1,0 +1,50 @@
+This guide shows you how to run a LangGraph application locally.
+
+Before you begin, ensure you have the following:
+
+=== "Python server"
+
+=== "Node server"
+
+Create a new app from the [`new-langgraph-project-python` template](https://github.com/langchain-ai/new-langgraph-project) or [`new-langgraph-project-js` template](https://github.com/langchain-ai/new-langgraphjs-project). This template demonstrates a single-node application you can extend with your own logic.
+
+=== "Python server"
+
+=== "Node server"
+
+!!! tip "Additional templates"
+
+In the root of your new LangGraph app, install the dependencies in `edit` mode so your local changes are used by the server:
+
+=== "Python server"
+
+=== "Node server"
+
+You will find a `.env.example` in the root of your new LangGraph app. Create a `.env` file in the root of your new LangGraph app and copy the contents of the `.env.example` file into it, filling in the necessary API keys:
+
+Start the LangGraph API server locally:
+
+=== "Python server"
+
+=== "Node server"
+
+Sample output:
+
+The `langgraph dev` command starts LangGraph Server in an in-memory mode. This mode is suitable for development and testing purposes. For production use, deploy LangGraph Server with access to a persistent storage backend. For more information, see [Deployment options](../../concepts/deployment_options.md).
+
+[LangGraph Studio](../../concepts/langgraph_studio.md) is a specialized UI that you can connect to LangGraph API server to visualize, interact with, and debug your application locally. Test your graph in LangGraph Studio by visiting the URL provided in the output of the `langgraph dev` command:
+
+For a LangGraph Server running on a custom host/port, update the baseURL parameter.
+
+??? info "Safari compatibility"
+
+=== "Python SDK (async)"
+
+=== "Python SDK (sync)"
+
+=== "Javascript SDK"
+
+=== "Rest API"
+
+Now that you have a LangGraph app running locally, take your journey further by exploring deployment and advanced features:
+

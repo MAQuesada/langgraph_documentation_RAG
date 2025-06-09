@@ -1,0 +1,36 @@
+This guide assumes knowledge of what double-texting is, which you can learn about in the [double-texting conceptual guide](../../concepts/double_texting.md).
+
+The guide covers the `enqueue` option for double texting, which adds the interruptions to a queue and executes them in the order they are received by the client. Below is a quick example of using the `enqueue` option.
+
+First, we will define a quick helper function for printing out JS and CURL model outputs (you can skip this if using Python):
+
+=== "Javascript"
+
+=== "CURL"
+
+Then, let's import our required packages and instantiate our client, assistant, and thread.
+
+=== "Python"
+
+=== "Javascript"
+
+=== "CURL"
+
+Now let's start two runs, with the second interrupting the first one with a multitask strategy of "enqueue":
+
+=== "Python"
+
+=== "Javascript"
+
+=== "CURL"
+
+Verify that the thread has data from both runs:
+
+=== "Python"
+
+=== "Javascript"
+
+=== "CURL"
+
+Output:
+

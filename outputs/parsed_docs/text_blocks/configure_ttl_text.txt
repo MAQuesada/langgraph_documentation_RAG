@@ -1,0 +1,22 @@
+!!! tip "Prerequisites"
+
+???+ note "LangGraph platform only"
+
+The LangGraph Platform persists both [checkpoints](../../concepts/persistence.md#checkpoints) (thread state) and [cross-thread memories](../../concepts/persistence.md#memory-store) (store items). Configure Time-to-Live (TTL) policies in `langgraph.json` to automatically manage the lifecycle of this data, preventing indefinite accumulation.
+
+Checkpoints capture the state of conversation threads. Setting a TTL ensures old checkpoints and threads are automatically deleted.
+
+Add a `checkpointer.ttl` configuration to your `langgraph.json` file:
+
+Store items allow cross-thread data persistence. Configuring TTL for store items helps manage memory by removing stale data.
+
+Add a `store.ttl` configuration to your `langgraph.json` file:
+
+You can configure TTLs for both checkpoints and store items in the same `langgraph.json` file to set different policies for each data type. Here is an example:
+
+The default `store.ttl` settings from `langgraph.json` can be overridden at runtime by providing specific TTL values in SDK method calls like `get`, `put`, and `search`.
+
+After configuring TTLs in `langgraph.json`, deploy or restart your LangGraph application for the changes to take effect. Use `langgraph dev` for local development or `langgraph up` for Docker deployment.
+
+See the [langgraph.json CLI reference][configuration-file] for more details on the other configurable options.
+

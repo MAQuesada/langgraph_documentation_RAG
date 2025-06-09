@@ -1,0 +1,65 @@
+Language: yaml
+components:
+  securitySchemes:
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+security:
+  - apiKeyAuth: []
+
+---
+
+Language: None
+```json
+{
+  "auth": {
+    "path": "./auth.py:my_auth",  // Implement auth logic here
+    "openapi": {
+      "securitySchemes": {
+        "OAuth2": {
+          "type": "oauth2",
+          "flows": {
+            "implicit": {
+              "authorizationUrl": "https://your-auth-server.com/oauth/authorize",
+              "scopes": {
+                "me": "Read information about the current user",
+                "threads": "Access to create and manage threads"
+              }
+            }
+          }
+        }
+      },
+      "security": [
+        {"OAuth2": ["me", "threads"]}
+      ]
+    }
+  }
+}
+```
+
+---
+
+Language: None
+```json
+{
+  "auth": {
+    "path": "./auth.py:my_auth",  // Implement auth logic here
+    "openapi": {
+      "securitySchemes": {
+        "apiKeyAuth": {
+          "type": "apiKey",
+          "in": "header",
+          "name": "X-API-Key"
+        }
+      },
+      "security": [
+        {"apiKeyAuth": []}
+      ]
+    }
+  }
+}
+```
+
+---
+

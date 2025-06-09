@@ -1,0 +1,12 @@
+!!! info "Prerequisites"
+
+Studio allows you to view threads from the server and edit their state.
+
+To edit the state of the thread, select "edit node state" next to the desired node. Edit the node's output as desired and click "fork" to confirm. This will create a new forked run from the checkpoint of the selected node.
+
+If you instead want to re-run the thread from a given checkpoint without editing the state, click the "Re-run from here". This will again create a new forked run from the selected checkpoint. This is useful for re-running with changes that are not specific to the state, such as the selected assistant.
+
+To edit a human message in the thread, click the edit button below the human message. Edit the message as desired and submit. This will create a new fork of the conversation history. To re-generate an AI message, click the retry icon below the AI message.
+
+For more information about time travel, [see here](../../concepts/time-travel.md).
+

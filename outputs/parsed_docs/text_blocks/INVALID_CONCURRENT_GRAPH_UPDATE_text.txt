@@ -1,0 +1,16 @@
+A LangGraph [`StateGraph`](https://langchain-ai.github.io/langgraph/reference/graphs/#langgraph.graph.state.StateGraph) received concurrent updates to its state from multiple nodes to a state property that doesn't
+support it.
+
+One way this can occur is if you are using a [fanout](https://langchain-ai.github.io/langgraph/how-tos/map-reduce/)
+or other parallel execution in your graph and you have defined a graph like this:
+
+If a node in the above graph returns `{ "some_key": "some_string_value" }`, this will overwrite the state value for `"some_key"` with `"some_string_value"`.
+However, if multiple nodes in e.g. a fanout within a single step return values for `"some_key"`, the graph will throw this error because
+there is uncertainty around how to update the internal state.
+
+To get around this, you can define a reducer that combines multiple values:
+
+This will allow you to define logic that handles the same key returned from multiple nodes executed in parallel.
+
+The following may help resolve this error:
+

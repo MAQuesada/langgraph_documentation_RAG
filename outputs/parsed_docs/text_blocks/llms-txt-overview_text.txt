@@ -1,0 +1,16 @@
+Below you can find a list of documentation files in the [`llms.txt`](https://llmstxt.org/) format, specifically `llms.txt` and `llms-full.txt`. These files allow large language models (LLMs) and agents to access programming documentation and APIs, particularly useful within integrated development environments (IDEs).
+
+!!! info "Review the output"
+
+As of March 9, 2025, IDEs [do not yet have robust native support for `llms.txt`](https://x.com/jeremyphoward/status/1902109312216129905?t=1eHFv2vdNdAckajnug0_Vw&s=19). However, you can still use `llms.txt` effectively through an MCP server.
+
+We provide an **MCP server** that was designed to serve documentation for LLMs and IDEs:
+
+👉 **[langchain-ai/mcpdoc GitHub Repository](https://github.com/langchain-ai/mcpdoc)**
+
+This MCP server allows integrating `llms.txt` into tools like **Cursor**, **Windsurf**, **Claude**, and **Claude Code**.
+
+📘 **Setup instructions and usage examples** are available in the repository.
+
+The LangGraph `llms-full.txt` file typically contains several hundred thousand tokens, exceeding the context window limitations of most LLMs. To effectively use this file:
+

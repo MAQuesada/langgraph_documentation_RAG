@@ -1,0 +1,306 @@
+Language: None
+```python
+
+---
+
+Language: None
+class ConfigSchema(TypedDict):
+    model_name: str
+
+---
+
+Language: None
+builder = StateGraph(AgentState, config_schema=ConfigSchema)
+
+---
+
+Language: None
+def call_model(state, config):
+    messages = state["messages"]
+    model_name = config.get('configurable', {}).get("model_name", "anthropic")
+    model = _get_model(model_name)
+    response = model.invoke(messages)
+    # We return a list, because this will get added to the existing list
+    return {"messages": [response]}
+```
+
+---
+
+Language: None
+```js
+import { Annotation } from "@langchain/langgraph";
+
+---
+
+Language: None
+const ConfigSchema = Annotation.Root({
+    model_name: Annotation<string>,
+    system_prompt:
+});
+
+---
+
+Language: None
+const builder = new StateGraph(AgentState, ConfigSchema)
+
+---
+
+Language: None
+function callModel(state: State, config: RunnableConfig) {
+  const messages = state.messages;
+  const modelName = config.configurable?.model_name ?? "anthropic";
+  const model = _getModel(modelName);
+  const response = model.invoke(messages);
+  // We return a list, because this will get added to the existing list
+  return { messages: [response] };
+}
+```
+
+---
+
+Language: None
+```python
+from langgraph_sdk import get_client
+
+---
+
+Language: None
+client = get_client(url=<DEPLOYMENT_URL>)
+openai_assistant = await client.assistants.create(
+    # "agent" is the name of a graph we deployed
+    "agent", config={"configurable": {"model_name": "openai"}}, name="Open AI Assistant"
+)
+
+---
+
+Language: None
+print(openai_assistant)
+```
+
+---
+
+Language: None
+```js
+import { Client } from "@langchain/langgraph-sdk";
+
+---
+
+Language: None
+const client = new Client({ apiUrl: <DEPLOYMENT_URL> });
+const openAIAssistant = await client.assistants.create({
+    graphId: 'agent',
+    name: "Open AI Assistant",
+    config: { "configurable": { "model_name": "openai" } },
+});
+
+---
+
+Language: None
+console.log(openAIAssistant);
+```
+
+---
+
+Language: None
+```bash
+curl --request POST \
+    --url <DEPLOYMENT_URL>/assistants \
+    --header 'Content-Type: application/json' \
+    --data '{"graph_id":"agent", "config":{"configurable":{"model_name":"openai"}}, "name": "Open AI Assistant"}'
+```
+
+---
+
+Language: None
+{
+    "assistant_id": "62e209ca-9154-432a-b9e9-2d75c7a9219b",
+    "graph_id": "agent",
+    "name": "Open AI Assistant"
+    "config": {
+        "configurable": {
+            "model_name": "openai"
+        }
+    },
+    "metadata": {}
+    "created_at": "2024-08-31T03:09:10.230718+00:00",
+    "updated_at": "2024-08-31T03:09:10.230718+00:00",
+}
+
+---
+
+Language: None
+```python
+thread = await client.threads.create()
+input = {"messages": [{"role": "user", "content": "who made you?"}]}
+async for event in client.runs.stream(
+    thread["thread_id"],
+    # this is where we specify the assistant id to use
+    openai_assistant["assistant_id"],
+    input=input,
+    stream_mode="updates",
+):
+    print(f"Receiving event of type: {event.event}")
+    print(event.data)
+    print("\n\n")
+```
+
+---
+
+Language: None
+```js
+const thread = await client.threads.create();
+const input = { "messages": [{ "role": "user", "content": "who made you?" }] };
+
+---
+
+Language: None
+const streamResponse = client.runs.stream(
+  thread["thread_id"],
+  // this is where we specify the assistant id to use
+  openAIAssistant["assistant_id"],
+  {
+    input,
+    streamMode: "updates"
+  }
+);
+
+---
+
+Language: None
+for await (const event of streamResponse) {
+  console.log(`Receiving event of type: ${event.event}`);
+  console.log(event.data);
+  console.log("\n\n");
+}
+```
+
+---
+
+Language: None
+```bash
+thread_id=$(curl --request POST \
+    --url <DEPLOYMENT_URL>/threads \
+    --header 'Content-Type: application/json' \
+    --data '{}' | jq -r '.thread_id') && \
+curl --request POST \
+    --url "<DEPLOYMENT_URL>/threads/${thread_id}/runs/stream" \
+    --header 'Content-Type: application/json' \
+    --data '{
+        "assistant_id": <OPENAI_ASSISTANT_ID>,
+        "input": {
+            "messages": [
+                {
+                    "role": "user",
+                    "content": "who made you?"
+                }
+            ]
+        },
+        "stream_mode": [
+            "updates"
+        ]
+    }' | \
+    sed 's/\r$//' | \
+    awk '
+    /^event:/ {
+        if (data_content != "") {
+            print data_content "\n"
+        }
+        sub(/^event: /, "Receiving event of type: ", $0)
+        printf "%s...\n", $0
+        data_content = ""
+    }
+    /^data:/ {
+        sub(/^data: /, "", $0)
+        data_content = $0
+    }
+    END {
+        if (data_content != "") {
+            print data_content "\n\n"
+        }
+    }
+'
+```
+
+---
+
+Language: None
+Receiving event of type: metadata
+{'run_id': '1ef6746e-5893-67b1-978a-0f1cd4060e16'}
+
+---
+
+Language: None
+Receiving event of type: updates
+{'agent': {'messages': [{'content': 'I was created by OpenAI, a research organization focused on developing and advancing artificial intelligence technology.', 'additional_kwargs': {}, 'response_metadata': {'finish_reason': 'stop', 'model_name': 'gpt-4o-2024-05-13', 'system_fingerprint': 'fp_157b3831f5'}, 'type': 'ai', 'name': None, 'id': 'run-e1a6b25c-8416-41f2-9981-f9cfe043f414', 'example': False, 'tool_calls': [], 'invalid_tool_calls': [], 'usage_metadata': None}]}}
+
+---
+
+Language: None
+```python
+openai_assistant_v2 = await client.assistants.update(
+    openai_assistant["assistant_id"],
+    config={
+        "configurable": {
+            "model_name": "openai",
+            "system_prompt": "You are an unhelpful assistant!",
+        }
+    },
+)
+```
+
+---
+
+Language: None
+```js
+const openaiAssistantV2 = await client.assistants.update(
+    openai_assistant["assistant_id"],
+    {
+        config: {
+            configurable: {
+                model_name: 'openai',
+                system_prompt: 'You are an unhelpful assistant!',
+            },
+    },
+});
+```
+
+---
+
+Language: None
+```bash
+curl --request PATCH \
+--url <DEPOLYMENT_URL>/assistants/<ASSISTANT_ID> \
+--header 'Content-Type: application/json' \
+--data '{
+"config": {"model_name": "openai", "system_prompt": "You are an unhelpful assistant!"}
+}'
+```
+
+---
+
+Language: None
+```python
+await client.assistants.set_latest(openai_assistant['assistant_id'], 1)
+```
+
+---
+
+Language: None
+```js
+await client.assistants.setLatest(openaiAssistant['assistant_id'], 1);
+```
+
+---
+
+Language: None
+```bash
+curl --request POST \
+--url <DEPLOYMENT_URL>/assistants/<ASSISTANT_ID>/latest \
+--header 'Content-Type: application/json' \
+--data '{
+"version": 1
+}'
+```
+
+---
+

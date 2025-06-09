@@ -1,0 +1,573 @@
+Language: None
+This guide assumes familiarity with the following concepts:
+
+---
+
+Language: None
+* [Tool calling](https://python.langchain.com/docs/concepts/tool_calling/)
+* [Human-in-the-loop](../../concepts/human_in_the_loop.md)
+* [LangGraph Glossary](../../concepts/low_level.md)
+
+---
+
+Language: python
+def human_review_node(state) -> Command[Literal["call_llm", "run_tool"]]:
+    # this is the value we'll be providing via Command(resume=<human_review>)
+    human_review = interrupt(
+        {
+            "question": "Is this correct?",
+            # Surface tool calls for review
+            "tool_call": tool_call
+        }
+    )
+
+    review_action, review_data = human_review
+
+    # Approve the tool call and continue
+    if review_action == "continue":
+        return Command(goto="run_tool")
+
+    # Modify the tool call manually and then continue
+    elif review_action == "update":
+        ...
+        updated_msg = get_updated_msg(review_data)
+        return Command(goto="run_tool", update={"messages": [updated_message]})
+
+    # Give natural language feedback, and then pass that back to the agent
+    elif review_action == "feedback":
+        ...
+        feedback_msg = get_feedback_msg(review_data)
+        return Command(goto="call_llm", update={"messages": [feedback_msg]})
+
+
+---
+
+Language: None
+```python
+from langgraph_sdk import get_client
+client = get_client(url=<DEPLOYMENT_URL>)
+# Using the graph deployed with the name "agent"
+assistant_id = "agent"
+thread = await client.threads.create()
+```
+
+---
+
+Language: None
+```js
+import { Client } from "@langchain/langgraph-sdk";
+
+---
+
+Language: None
+const client = new Client({ apiUrl: <DEPLOYMENT_URL> });
+// Using the graph deployed with the name "agent"
+const assistantId = "agent";
+const thread = await client.threads.create();
+```
+
+---
+
+Language: None
+```bash
+curl --request POST \
+  --url <DEPLOYMENT_URL>/threads \
+  --header 'Content-Type: application/json' \
+  --data '{}'
+```
+
+---
+
+Language: None
+```python
+input = {"messages": [{"role": "user", "content": "what's the weather in sf?"}]}
+
+---
+
+Language: None
+async for chunk in client.runs.stream(
+    thread["thread_id"],
+    assistant_id,
+    input=input,
+    stream_mode="updates",
+):
+    if chunk.data and chunk.event != "metadata": 
+        print(chunk.data)
+```
+
+---
+
+Language: None
+```js
+const input = { "messages": [{ "role": "user", "content": "what's the weather in sf?" }] };
+
+---
+
+Language: None
+const streamResponse = client.runs.stream(
+  thread["thread_id"],
+  assistantId,
+  {
+    input: input,
+    streamMode: "updates"
+  }
+);
+
+---
+
+Language: None
+for await (const chunk of streamResponse) {
+  if (chunk.data && chunk.event !== "metadata") {
+    console.log(chunk.data);
+  }
+}
+```
+
+---
+
+Language: None
+```bash
+curl --request POST \
+ --url <DEPLOYMENT_URL>/threads/<THREAD_ID>/runs/stream \
+ --header 'Content-Type: application/json' \
+ --data "{
+   \"assistant_id\": \"agent\",
+   \"input\": {\"messages\": [{\"role\": \"human\", \"content\": \"what's the weather in sf?\"}]},
+   \"stream_mode\": [
+     \"updates\"
+   ]
+ }"
+```
+
+---
+
+Language: None
+{'call_llm': {'messages': [{'content': [{'text': "I'll help you check the weather in San Francisco.", 'type': 'text'}, {'id': 'toolu_01142G3woscA8JjFTLdqymtn', 'input': {'city': 'San Francisco'}, 'name': 'weather_search', 'type': 'tool_use'}], 'additional_kwargs': {}, 'response_metadata': {'id': 'msg_01Tdfufy4nZYXMbVZvgyNbhc', 'model': 'claude-3-5-sonnet-20241022', 'stop_reason': 'tool_use', 'stop_sequence': None, 'usage': {'cache_creation_input_tokens': 0, 'cache_read_input_tokens': 0, 'input_tokens': 379, 'output_tokens': 66}, 'model_name': 'claude-3-5-sonnet-20241022'}, 'type': 'ai', 'name': None, 'id': 'run-a33434b2-f5ca-40c6-98e2-6288d349d4ce-0', 'example': False, 'tool_calls': [{'name': 'weather_search', 'args': {'city': 'San Francisco'}, 'id': 'toolu_01142G3woscA8JjFTLdqymtn', 'type': 'tool_call'}], 'invalid_tool_calls': [], 'usage_metadata': {'input_tokens': 379, 'output_tokens': 66, 'total_tokens': 445, 'input_token_details': {'cache_read': 0, 'cache_creation': 0}}}]}}
+{'__interrupt__': [{'value': {'question': 'Is this correct?', 'tool_call': {'name': 'weather_search', 'args': {'city': 'San Francisco'}, 'id': 'toolu_01142G3woscA8JjFTLdqymtn', 'type': 'tool_call'}}, 'resumable': True, 'ns': ['human_review_node:9caf42cf-1371-7213-a331-e6fe5d026be8'], 'when': 'during'}]}
+
+---
+
+Language: None
+```python
+# highlight-next-line
+from langgraph_sdk.schema import Command
+
+---
+
+Language: None
+async for chunk in client.runs.stream(
+    thread["thread_id"],
+    assistant_id,
+    # highlight-next-line
+    command=Command(resume={"action": "continue"}),
+    stream_mode="updates",
+):
+    if chunk.data and chunk.event != "metadata": 
+        print(chunk.data)
+```
+
+---
+
+Language: None
+```js
+const streamResponse = client.runs.stream(
+  thread["thread_id"],
+  assistantId,
+  {
+    // highlight-next-line
+    command: { resume: { "action": "continue" } },
+    streamMode: "updates"
+  }
+);
+
+---
+
+Language: None
+for await (const chunk of streamResponse) {
+  if (chunk.data && chunk.event !== "metadata") {
+    console.log(chunk.data);
+  }
+}
+```
+
+---
+
+Language: None
+```bash
+curl --request POST \
+ --url <DEPLOYMENT_URL>/threads/<THREAD_ID>/runs/stream \
+ --header 'Content-Type: application/json' \
+ --data "{
+   \"assistant_id\": \"agent\",
+   \"command\": {
+     \"resume\": { \"action\": \"continue\"}
+   },
+   \"stream_mode\": [
+     \"updates\"
+   ]
+ }"
+```
+
+---
+
+Language: None
+{'human_review_node': None}
+{'run_tool': {'messages': [{'role': 'tool', 'name': 'weather_search', 'content': 'Sunny!', 'tool_call_id': 'toolu_01142G3woscA8JjFTLdqymtn'}]}}
+{'call_llm': {'messages': [{'content': "According to the search, it's sunny in San Francisco right now!", 'additional_kwargs': {}, 'response_metadata': {'id': 'msg_01JJE9AtT4a9Lob91RRiW9rU', 'model': 'claude-3-5-sonnet-20241022', 'stop_reason': 'end_turn', 'stop_sequence': None, 'usage': {'cache_creation_input_tokens': 0, 'cache_read_input_tokens': 0, 'input_tokens': 458, 'output_tokens': 18}, 'model_name': 'claude-3-5-sonnet-20241022'}, 'type': 'ai', 'name': None, 'id': 'run-5e8d80b5-c46a-4aad-af37-b01f8bb15963-0', 'example': False, 'tool_calls': [], 'invalid_tool_calls': [], 'usage_metadata': {'input_tokens': 458, 'output_tokens': 18, 'total_tokens': 476, 'input_token_details': {'cache_read': 0, 'cache_creation': 0}}}]}}
+
+---
+
+Language: None
+```python
+input = {"messages": [{"role": "user", "content": "what's the weather in sf?"}]}
+
+---
+
+Language: None
+async for chunk in client.runs.stream(
+    thread["thread_id"],
+    assistant_id,
+    input=input,
+    stream_mode="updates",
+):
+    if chunk.data and chunk.event != "metadata": 
+        print(chunk.data)
+```
+
+---
+
+Language: None
+```js
+const input = { "messages": [{ "role": "user", "content": "what's the weather in sf?" }] };
+
+---
+
+Language: None
+const streamResponse = client.runs.stream(
+  thread["thread_id"],
+  assistantId,
+  {
+    input: input,
+    streamMode: "updates",
+  }
+);
+
+---
+
+Language: None
+for await (const chunk of streamResponse) {
+  if (chunk.data && chunk.event !== "metadata") {
+    console.log(chunk.data);
+  }
+}
+```
+
+---
+
+Language: None
+```bash
+curl --request POST \
+ --url <DEPLOYMENT_URL>/threads/<THREAD_ID>/runs/stream \
+ --header 'Content-Type: application/json' \
+ --data "{
+   \"assistant_id\": \"agent\",
+   \"input\": {\"messages\": [{\"role\": \"human\", \"content\": \"what's the weather in sf?\"}]},
+   \"stream_mode\": [
+     \"updates\"
+   ]
+ }"
+```
+
+---
+
+Language: None
+```python
+# highlight-next-line
+from langgraph_sdk.schema import Command
+
+---
+
+Language: None
+async for chunk in client.runs.stream(
+    thread["thread_id"],
+    assistant_id,
+    # highlight-next-line
+    command=Command(
+        # highlight-next-line
+        resume={"action": "update", "data": {"city": "San Francisco, USA"}}
+        # highlight-next-line
+    ),
+    stream_mode="updates",
+):
+    if chunk.data and chunk.event != "metadata": 
+        print(chunk.data)
+```
+
+---
+
+Language: None
+```js
+const streamResponse = client.runs.stream(
+  thread["thread_id"],
+  assistantId,
+  {
+    // highlight-next-line
+    command: {
+      // highlight-next-line
+      resume: { "action": "update", "data": { "city": "San Francisco, USA" } }
+      // highlight-next-line
+    },
+    streamMode: "updates"
+  }
+);
+
+---
+
+Language: None
+for await (const chunk of streamResponse) {
+  if (chunk.data && chunk.event !== "metadata") {
+    console.log(chunk.data);
+  }
+}
+```
+
+---
+
+Language: None
+```bash
+curl --request POST \
+ --url <DEPLOYMENT_URL>/threads/<THREAD_ID>/runs/stream \
+ --header 'Content-Type: application/json' \
+ --data "{
+   \"assistant_id\": \"agent\",
+   \"command\": {
+     \"resume\": { \"action\": \"update\", \"data\": { \"city\": \"San Francisco, USA\" } }
+   },
+   \"stream_mode\": [
+     \"updates\"
+   ]
+ }"
+```
+
+---
+
+Language: None
+{'human_review_node': {'messages': [{'role': 'ai', 'content': [{'text': "I'll help you check the weather in San Francisco.", 'type': 'text'}, {'id': 'toolu_016L4EDPcaQRzzZxiB4Wq2wa', 'input': {'city': 'San Francisco'}, 'name': 'weather_search', 'type': 'tool_use'}], 'tool_calls': [{'id': 'toolu_016L4EDPcaQRzzZxiB4Wq2wa', 'name': 'weather_search', 'args': {'city': 'San Francisco, USA'}}], 'id': 'run-b07f0c35-4e93-43a5-9b48-363767ada3ca-0'}]}}
+{'run_tool': {'messages': [{'role': 'tool', 'name': 'weather_search', 'content': 'Sunny!', 'tool_call_id': 'toolu_016L4EDPcaQRzzZxiB4Wq2wa'}]}}
+{'call_llm': {'messages': [{'content': "According to the search, it's sunny in San Francisco right now!", 'additional_kwargs': {}, 'response_metadata': {'id': 'msg_01De5HurjNUMwMUpfRtMLbX1', 'model': 'claude-3-5-sonnet-20241022', 'stop_reason': 'end_turn', 'stop_sequence': None, 'usage': {'cache_creation_input_tokens': 0, 'cache_read_input_tokens': 0, 'input_tokens': 460, 'output_tokens': 18}, 'model_name': 'claude-3-5-sonnet-20241022'}, 'type': 'ai', 'name': None, 'id': 'run-85e2aaaa-6f61-4fa0-b594-b6e57129d7e7-0', 'example': False, 'tool_calls': [], 'invalid_tool_calls': [], 'usage_metadata': {'input_tokens': 460, 'output_tokens': 18, 'total_tokens': 478, 'input_token_details': {'cache_read': 0, 'cache_creation': 0}}}]}}
+
+---
+
+Language: None
+```python
+input = {"messages": [{"role": "user", "content": "what's the weather in sf?"}]}
+
+---
+
+Language: None
+async for chunk in client.runs.stream(
+    thread["thread_id"],
+    assistant_id,
+    input=input,
+    stream_mode="updates",
+):
+    if chunk.data and chunk.event != "metadata": 
+        print(chunk.data)
+```
+
+---
+
+Language: None
+```js
+const input = { "messages": [{ "role": "user", "content": "what's the weather in sf?" }] };
+
+---
+
+Language: None
+const streamResponse = client.runs.stream(
+  thread["thread_id"],
+  assistantId,
+  {
+    input: input,
+    streamMode: "updates"
+  }
+);
+
+---
+
+Language: None
+for await (const chunk of streamResponse) {
+  if (chunk.data && chunk.event !== "metadata") {
+    console.log(chunk.data);
+  }
+}
+```
+
+---
+
+Language: None
+```bash
+curl --request POST \
+ --url <DEPLOYMENT_URL>/threads/<THREAD_ID>/runs/stream \
+ --header 'Content-Type: application/json' \
+ --data "{
+   \"assistant_id\": \"agent\",
+   \"input\": {\"messages\": [{\"role\": \"human\", \"content\": \"what's the weather in sf?\"}]},
+   \"stream_mode\": [
+     \"updates\"
+   ]
+ }"
+```
+
+---
+
+Language: None
+```python
+# highlight-next-line
+from langgraph_sdk.schema import Command
+
+---
+
+Language: None
+async for chunk in client.runs.stream(
+    thread["thread_id"],
+    assistant_id,
+    # highlight-next-line
+    command=Command(
+        resume={
+            "action": "feedback", 
+            "data": "User requested changes: use <city, country> format for location"
+        }
+    ),
+    stream_mode="updates",
+):
+    if chunk.data and chunk.event != "metadata": 
+        print(chunk.data)
+```
+
+---
+
+Language: None
+```js
+const streamResponse = client.runs.stream(
+  thread["thread_id"],
+  assistantId,
+  {
+    // highlight-next-line
+    command: {
+      resume: {
+        "action": "feedback", 
+        "data": "User requested changes: use <city, country> format for location"
+      }
+    },
+    streamMode: "updates"
+  }
+);
+
+---
+
+Language: None
+for await (const chunk of streamResponse) {
+  if (chunk.data && chunk.event !== "metadata") {
+    console.log(chunk.data);
+  }
+}
+```
+
+---
+
+Language: None
+```bash
+curl --request POST \
+ --url <DEPLOYMENT_URL>/threads/<THREAD_ID>/runs/stream \
+ --header 'Content-Type: application/json' \
+ --data "{
+   \"assistant_id\": \"agent\",
+   \"command\": {
+     \"resume\": { \"action\": \"feedback\", \"data\": \"User requested changes: use <city, country> format for location\" }
+   },
+   \"stream_mode\": [
+     \"updates\"
+   ]
+ }"
+```
+
+---
+
+Language: None
+{'human_review_node': {'messages': [{'role': 'tool', 'content': 'User requested changes: use <city, country> format for location', 'name': 'weather_search', 'tool_call_id': 'toolu_01RkPHCjpfoUvPAktaq4Cqhm'}]}}
+{'call_llm': {'messages': [{'content': [{'text': 'Let me try that again with the correct format:', 'type': 'text'}, {'id': 'toolu_01Rdrag6cVufHZG26BwVaiE7', 'input': {'city': 'San Francisco, USA'}, 'name': 'weather_search', 'type': 'tool_use'}], 'additional_kwargs': {}, 'response_metadata': {'id': 'msg_01EBan969yY5f6iGk6sPgKcj', 'model': 'claude-3-5-sonnet-20241022', 'stop_reason': 'tool_use', 'stop_sequence': None, 'usage': {'cache_creation_input_tokens': 0, 'cache_read_input_tokens': 0, 'input_tokens': 469, 'output_tokens': 68}, 'model_name': 'claude-3-5-sonnet-20241022'}, 'type': 'ai', 'name': None, 'id': 'run-64bbc255-d126-4db0-8ae5-3197cf29bed1-0', 'example': False, 'tool_calls': [{'name': 'weather_search', 'args': {'city': 'San Francisco, USA'}, 'id': 'toolu_01Rdrag6cVufHZG26BwVaiE7', 'type': 'tool_call'}], 'invalid_tool_calls': [], 'usage_metadata': {'input_tokens': 469, 'output_tokens': 68, 'total_tokens': 537, 'input_token_details': {'cache_read': 0, 'cache_creation': 0}}}]}}
+{'__interrupt__': [{'value': {'question': 'Is this correct?', 'tool_call': {'name': 'weather_search', 'args': {'city': 'San Francisco, USA'}, 'id': 'toolu_01Rdrag6cVufHZG26BwVaiE7', 'type': 'tool_call'}}, 'resumable': True, 'ns': ['human_review_node:e9856878-e28c-5dd1-d353-4d83aa1a3a2b'], 'when': 'during'}]}
+
+---
+
+Language: None
+```python
+# highlight-next-line
+from langgraph_sdk.schema import Command
+
+---
+
+Language: None
+async for chunk in client.runs.stream(
+    thread["thread_id"],
+    assistant_id,
+    # highlight-next-line
+    command=Command(resume={"action": "continue"}),
+    stream_mode="updates",
+):
+    if chunk.data and chunk.event != "metadata": 
+        print(chunk.data)
+```
+
+---
+
+Language: None
+```js
+const streamResponse = client.runs.stream(
+  thread["thread_id"],
+  assistantId,
+  {
+    // highlight-next-line
+    command: { resume: { "action": "continue" } },
+    streamMode: "updates"
+  }
+);
+
+---
+
+Language: None
+for await (const chunk of streamResponse) {
+  if (chunk.data && chunk.event !== "metadata") {
+    console.log(chunk.data);
+  }
+}
+```
+
+---
+
+Language: None
+```bash
+curl --request POST \
+ --url <DEPLOYMENT_URL>/threads/<THREAD_ID>/runs/stream \
+ --header 'Content-Type: application/json' \
+ --data "{
+   \"assistant_id\": \"agent\",
+   \"command\": {
+     \"resume\": { \"action\": \"continue\"}
+   },
+   \"stream_mode\": [
+     \"updates\"
+   ]
+ }"
+```
+
+---
+
+Language: None
+{'human_review_node': None}
+{'run_tool': {'messages': [{'role': 'tool', 'name': 'weather_search', 'content': 'Sunny!', 'tool_call_id': 'toolu_01Rdrag6cVufHZG26BwVaiE7'}]}}
+{'call_llm': {'messages': [{'content': 'The weather in San Francisco is sunny!', 'additional_kwargs': {}, 'response_metadata': {'id': 'msg_013WTDHhbg8WiYLiQ9n2CaTk', 'model': 'claude-3-5-sonnet-20241022', 'stop_reason': 'end_turn', 'stop_sequence': None, 'usage': {'cache_creation_input_tokens': 0, 'cache_read_input_tokens': 0, 'input_tokens': 550, 'output_tokens': 12}, 'model_name': 'claude-3-5-sonnet-20241022'}, 'type': 'ai', 'name': None, 'id': 'run-b6c815f0-989a-47cf-b150-33e3bbc4eab7-0', 'example': False, 'tool_calls': [], 'invalid_tool_calls': [], 'usage_metadata': {'input_tokens': 550, 'output_tokens': 12, 'total_tokens': 562, 'input_token_details': {'cache_read': 0, 'cache_creation': 0}}}]}}
+
+---
+

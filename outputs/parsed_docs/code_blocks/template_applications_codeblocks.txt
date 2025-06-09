@@ -1,0 +1,90 @@
+Language: None
+- Python >= 3.11
+- [LangGraph CLI](https://langchain-ai.github.io/langgraph/cloud/reference/cli/): Requires langchain-cli[inmem] >= 0.1.58
+
+---
+
+Language: None
+```bash
+pip install "langgraph-cli[inmem]" --upgrade
+```
+
+---
+
+Language: None
+Or via [`uv`](https://docs.astral.sh/uv/getting-started/installation/) (recommended):
+
+---
+
+Language: None
+```bash
+uvx --from "langgraph-cli[inmem]" langgraph dev --help
+```
+
+---
+
+Language: None
+```bash
+npx @langchain/langgraph-cli --help
+```
+
+---
+
+Language: None
+```bash
+langgraph new
+```
+
+---
+
+Language: None
+Or via [`uv`](https://docs.astral.sh/uv/getting-started/installation/) (recommended):
+
+---
+
+Language: None
+```bash
+uvx --from "langgraph-cli[inmem]" langgraph new
+```
+
+---
+
+Language: None
+```bash
+npx @langchain/langgraph-cli new 
+```
+
+---
+
+Language: None
+```bash
+langgraph dev
+```
+
+---
+
+Language: None
+Or via [`uv`](https://docs.astral.sh/uv/getting-started/installation/) (recommended):
+
+---
+
+Language: None
+```bash
+uvx --from "langgraph-cli[inmem]" --with-editable . langgraph dev
+```
+
+---
+
+Language: None
+??? info "Missing Local Package?"
+    If you are not using `uv` and run into a "`ModuleNotFoundError`" or "`ImportError`", even after installing the local package (`pip install -e .`), it is likely the case that you need to install the CLI into your local virtual environment to make the CLI "aware" of the local package. You can do this by running `python -m pip install "langgraph-cli[inmem]"` and re-activating your virtual environment before running `langgraph dev`.
+
+---
+
+Language: None
+```bash
+npx @langchain/langgraph-cli dev
+```
+
+---
+

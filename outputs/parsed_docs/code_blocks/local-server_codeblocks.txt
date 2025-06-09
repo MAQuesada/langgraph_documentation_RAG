@@ -1,0 +1,277 @@
+Language: None
+```shell
+# Python >= 3.11 is required.
+
+---
+
+Language: None
+pip install --upgrade "langgraph-cli[inmem]"
+```
+
+---
+
+Language: None
+```shell
+npx @langchain/langgraph-cli
+```
+
+---
+
+Language: None
+```shell
+langgraph new path/to/your/app --template new-langgraph-project-python
+```
+
+---
+
+Language: None
+```shell
+langgraph new path/to/your/app --template new-langgraph-project-js
+```
+
+---
+
+Language: None
+If you use `langgraph new` without specifying a template, you will be presented with an interactive menu that will allow you to choose from a list of available templates.
+
+---
+
+Language: None
+```shell
+cd path/to/your/app
+pip install -e .
+```
+
+---
+
+Language: None
+```shell
+cd path/to/your/app
+yarn install
+```
+
+---
+
+Language: bash
+LANGSMITH_API_KEY=lsv2...
+
+---
+
+Language: None
+```shell
+langgraph dev
+```
+
+---
+
+Language: None
+```shell
+npx @langchain/langgraph-cli dev
+```
+
+---
+
+Language: 
+>    Ready!
+>
+>    - API: [http://localhost:2024](http://localhost:2024/)
+>
+>    - Docs: http://localhost:2024/docs
+>
+>    - LangGraph Studio Web UI: https://smith.langchain.com/studio/?baseUrl=http://127.0.0.1:2024
+
+---
+
+Language: 
+>    - LangGraph Studio Web UI: https://smith.langchain.com/studio/?baseUrl=http://127.0.0.1:2024
+
+---
+
+Language: None
+Use the `--tunnel` flag with your command to create a secure tunnel, as Safari has limitations when connecting to localhost servers:
+
+---
+
+Language: None
+```shell
+langgraph dev --tunnel
+```
+
+---
+
+Language: None
+1. Install the LangGraph Python SDK:
+
+---
+
+Language: None
+    ```shell
+    pip install langgraph-sdk
+    ```
+
+---
+
+Language: None
+1. Send a message to the assistant (threadless run):
+
+---
+
+Language: None
+    ```python
+    from langgraph_sdk import get_client
+    import asyncio
+
+---
+
+Language: None
+    client = get_client(url="http://localhost:2024")
+
+---
+
+Language: None
+    async def main():
+        async for chunk in client.runs.stream(
+            None,  # Threadless run
+            "agent", # Name of assistant. Defined in langgraph.json.
+            input={
+            "messages": [{
+                "role": "human",
+                "content": "What is LangGraph?",
+                }],
+            },
+        ):
+            print(f"Receiving new event of type: {chunk.event}...")
+            print(chunk.data)
+            print("\n\n")
+
+---
+
+Language: None
+    asyncio.run(main())
+    ```
+
+---
+
+Language: None
+1. Install the LangGraph Python SDK:
+
+---
+
+Language: None
+    ```shell
+    pip install langgraph-sdk
+    ```
+
+---
+
+Language: None
+1. Send a message to the assistant (threadless run):
+
+---
+
+Language: None
+    ```python
+    from langgraph_sdk import get_sync_client
+
+---
+
+Language: None
+    client = get_sync_client(url="http://localhost:2024")
+
+---
+
+Language: None
+    for chunk in client.runs.stream(
+        None,  # Threadless run
+        "agent", # Name of assistant. Defined in langgraph.json.
+        input={
+            "messages": [{
+                "role": "human",
+                "content": "What is LangGraph?",
+            }],
+        },
+        stream_mode="messages-tuple",
+    ):
+        print(f"Receiving new event of type: {chunk.event}...")
+        print(chunk.data)
+        print("\n\n")
+    ```
+
+---
+
+Language: None
+1. Install the LangGraph JS SDK:
+
+---
+
+Language: None
+    ```shell
+    npm install @langchain/langgraph-sdk
+    ```
+
+---
+
+Language: None
+1. Send a message to the assistant (threadless run):
+
+---
+
+Language: None
+    ```js
+    const { Client } = await import("@langchain/langgraph-sdk");
+
+---
+
+Language: None
+    // only set the apiUrl if you changed the default port when calling langgraph dev
+    const client = new Client({ apiUrl: "http://localhost:2024"});
+
+---
+
+Language: None
+    const streamResponse = client.runs.stream(
+        null, // Threadless run
+        "agent", // Assistant ID
+        {
+            input: {
+                "messages": [
+                    { "role": "user", "content": "What is LangGraph?"}
+                ]
+            },
+            streamMode: "messages-tuple",
+        }
+    );
+
+---
+
+Language: None
+    for await (const chunk of streamResponse) {
+        console.log(`Receiving new event of type: ${chunk.event}...`);
+        console.log(JSON.stringify(chunk.data));
+        console.log("\n\n");
+    }
+    ```
+
+---
+
+Language: None
+```bash
+curl -s --request POST \
+    --url "http://localhost:2024/runs/stream" \
+    --header 'Content-Type: application/json' \
+    --data "{
+        \"assistant_id\": \"agent\",
+        \"input\": {
+            \"messages\": [
+                {
+                    \"role\": \"human\",
+                    \"content\": \"What is LangGraph?\"
+                }
+            ]
+        },
+        \"stream_mode\": \"messages-tuple\"
+    }"
+```
+
+---
+

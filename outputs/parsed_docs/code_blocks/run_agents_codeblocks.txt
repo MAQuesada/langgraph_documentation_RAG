@@ -1,0 +1,132 @@
+Language: None
+```python
+from langgraph.prebuilt import create_react_agent
+
+---
+
+Language: None
+agent = create_react_agent(...)
+
+---
+
+Language: None
+# highlight-next-line
+response = agent.invoke({"messages": [{"role": "user", "content": "what is the weather in sf"}]})
+```
+
+---
+
+Language: None
+```python
+from langgraph.prebuilt import create_react_agent
+
+---
+
+Language: None
+agent = create_react_agent(...)
+# highlight-next-line
+response = await agent.ainvoke({"messages": [{"role": "user", "content": "what is the weather in sf"}]})
+```
+
+---
+
+Language: None
+You can provide additional fields defined in your agent’s state schema directly in the input dictionary. This allows dynamic behavior based on runtime data or prior tool outputs.  
+See the [context guide](./context.md) for full details.
+
+---
+
+Language: None
+A string input for `messages` is converted to a [HumanMessage](https://python.langchain.com/docs/concepts/messages/#humanmessage). This behavior differs from the `prompt` parameter in `create_react_agent`, which is interpreted as a [SystemMessage](https://python.langchain.com/docs/concepts/messages/#systemmessage) when passed as a string.
+
+---
+
+Language: None
+```python
+for chunk in agent.stream(
+    {"messages": [{"role": "user", "content": "what is the weather in sf"}]},
+    stream_mode="updates"
+):
+    print(chunk)
+```
+
+---
+
+Language: None
+```python
+async for chunk in agent.astream(
+    {"messages": [{"role": "user", "content": "what is the weather in sf"}]},
+    stream_mode="updates"
+):
+    print(chunk)
+```
+
+---
+
+Language: None
+For full details, see the [streaming guide](./streaming.md).
+
+---
+
+Language: None
+```python
+from langgraph.errors import GraphRecursionError
+from langgraph.prebuilt import create_react_agent
+
+---
+
+Language: None
+max_iterations = 3
+# highlight-next-line
+recursion_limit = 2 * max_iterations + 1
+agent = create_react_agent(
+    model="anthropic:claude-3-5-haiku-latest",
+    tools=[get_weather]
+)
+
+---
+
+Language: None
+try:
+    response = agent.invoke(
+        {"messages": [{"role": "user", "content": "what's the weather in sf"}]},
+        # highlight-next-line
+        {"recursion_limit": recursion_limit},
+    )
+except GraphRecursionError:
+    print("Agent stopped due to max iterations.")
+```
+
+---
+
+Language: None
+```python
+from langgraph.errors import GraphRecursionError
+from langgraph.prebuilt import create_react_agent
+
+---
+
+Language: None
+max_iterations = 3
+# highlight-next-line
+recursion_limit = 2 * max_iterations + 1
+agent = create_react_agent(
+    model="anthropic:claude-3-5-haiku-latest",
+    tools=[get_weather]
+)
+# highlight-next-line
+agent_with_recursion_limit = agent.with_config(recursion_limit=recursion_limit)
+
+---
+
+Language: None
+try:
+    response = agent_with_recursion_limit.invoke(
+        {"messages": [{"role": "user", "content": "what's the weather in sf"}]},
+    )
+except GraphRecursionError:
+    print("Agent stopped due to max iterations.")
+```
+
+---
+
