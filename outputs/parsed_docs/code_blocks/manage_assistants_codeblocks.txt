@@ -1,5 +1,0 @@
-Language: None
-- [Assistants Overview](../../../concepts/assistants.md)
-
----
-

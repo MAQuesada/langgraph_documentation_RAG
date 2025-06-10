@@ -1,9 +1,0 @@
-A LangGraph [`StateGraph`](https://langchain-ai.github.io/langgraph/reference/graphs/#langgraph.graph.state.StateGraph)
-received a non-dict return type from a node. Here's an example:
-
-Invoking the above graph will result in an error like this:
-
-Nodes in your graph must return a dict containing one or more keys defined in your state.
-
-The following may help resolve this error:
-

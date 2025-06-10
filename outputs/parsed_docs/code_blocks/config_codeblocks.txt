@@ -1,6 +1,0 @@
-Language: None
-    - get_store
-    - get_stream_writer
-
----
-

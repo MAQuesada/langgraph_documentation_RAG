@@ -1,2 +1,0 @@
-The LangGraph Platform consists of components that work together to support the development, deployment, debugging, and monitoring of LangGraph applications:
-

@@ -23,9 +23,9 @@ data_source:
 
 document_processing:
   chunking:
-    strategy: "code_aware_markdown"   # Preserve code blocks
-    chunk_size: 1500                  # Larger for code preservation
-    chunk_overlap: 300                # More overlap for context
+    semantic : True  # Preserve semantic similarity
+    chunk_size: 5000                # For recursive splitter fallback
+    chunk_overlap: 500                # More overlap for context
     
     # Markdown-specific settings
     markdown:

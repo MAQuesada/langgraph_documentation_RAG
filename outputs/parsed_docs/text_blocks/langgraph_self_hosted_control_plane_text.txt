@@ -1,9 +1,0 @@
-There are two versions of the self-hosted deployment: [Self-Hosted Data Plane](./deployment_options.md#self-hosted-data-plane) and [Self-Hosted Control Plane](./deployment_options.md#self-hosted-control-plane).
-
-!!! info "Important"
-    The Self-Hosted Control Plane deployment option is currently in beta stage and requires an [Enterprise](../../concepts/plans.md) plan.
-
-The [Self-Hosted Control Plane](./langgraph_self_hosted_control_plane.md) deployment option is a fully self-hosted model for deployment where you manage the [control plane](./langgraph_control_plane.md) and [data plane](./langgraph_data_plane.md) in your cloud. This option gives you full control and responsibility of the control plane and data plane infrastructure.
-
-![Self-Hosted Control Plane Architecture](./img/self_hosted_control_plane_architecture.png)
-

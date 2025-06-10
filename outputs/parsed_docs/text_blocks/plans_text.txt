@@ -1,7 +1,0 @@
-LangGraph Platform is a solution for deploying agentic applications in production.
-There are three different plans for using it.
-
-For pricing information, see [LangGraph Platform Pricing](https://www.langchain.com/langgraph-platform-pricing).
-
-For more information, please see:
-

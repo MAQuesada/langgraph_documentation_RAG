@@ -1,8 +1,0 @@
-::: langgraph_swarm.swarm
-    options:
-      members:
-
-::: langgraph_swarm.handoff
-    options:
-      members:
-

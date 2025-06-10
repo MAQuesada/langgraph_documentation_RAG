@@ -1,5 +1,0 @@
-Language: None
-- [Running agents](../../agents/run_agents.md#running-agents)
-
----
-

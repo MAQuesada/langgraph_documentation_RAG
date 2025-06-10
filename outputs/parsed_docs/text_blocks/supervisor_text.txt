@@ -1,8 +1,0 @@
-::: langgraph_supervisor.supervisor
-    options:
-      members:
-
-::: langgraph_supervisor.handoff
-    options:
-      members:
-

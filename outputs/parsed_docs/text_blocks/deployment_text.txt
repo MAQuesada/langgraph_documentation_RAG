@@ -1,4 +1,0 @@
-There are two free options for deploying LangGraph applications via the LangGraph Server:
-
-Additionally, you can deploy to production with [LangGraph Platform](../concepts/langgraph_platform.md):
-
