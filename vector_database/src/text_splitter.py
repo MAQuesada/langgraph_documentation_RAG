@@ -1,6 +1,7 @@
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.docstore.document import Document
-from vector_database.src.utils import load_config
+from pathlib import Path
+import json
 import nltk
 from nltk.tokenize import sent_tokenize
 nltk.download('punkt')
@@ -26,12 +27,13 @@ def sentence_based_chunking(text, chunk_size=800):
 
     return chunks
 
-config = load_config()
-chunking_config = config['document_processing']['chunking']
-chunk_size = chunking_config.get('chunk_size', 512)
-chunk_overlap = chunking_config.get('chunk_overlap', 50)
 
-def chunk_documents(documents):
+
+def chunk_documents(documents, config):
+    chunking_config = config['document_processing']['chunking']
+    chunk_size = chunking_config.get('chunk_size', 512)
+    chunk_overlap = chunking_config.get('chunk_overlap', 50)
+
     all_chunks = []
 
     splitter = RecursiveCharacterTextSplitter(
@@ -72,3 +74,20 @@ def chunk_documents(documents):
             print(f'Chunking failed for {file_path} = {e}')
         
     return all_chunks
+
+def save_chunks_to_disk(chunks, output_dir = 'docs/chunked_docs'):
+    output_path = Path(output_dir)
+    output_path.mkdir(parents=True, exist_ok=True)
+
+    chunks_data = []
+    for i, chunk in enumerate(chunks):
+        chunks_data.append({
+            "id" : i,
+            "content" : chunk.page_content,
+            "metadata" : chunk.metadata
+        })
+
+    with open(output_path/"chunked_docs.json", "w", encoding="utf-8") as f:
+        json.dump(chunks_data, f, indent=2, ensure_ascii=False)
+
+    print(f"\n Saved {len(chunks)} chunks to {output_path/'chunked_docs.json'}")

@@ -4,7 +4,7 @@ data_source:
   github:
     url: "https://github.com/langchain-ai/langgraph/tree/main/docs/docs"
     clone_url: "https://github.com/langchain-ai/langgraph.git"
-    target_path: "docs"
+    target_path: "docs/source_docs"
     local_cache: "langgraph_repo/docs/docs"
   
   file_filtering:

@@ -46,7 +46,7 @@ def clone_repo(config: dict):
 
 
 def cleanup_old_outputs():
-    base_output = Path("outputs/parsed_docs")
+    base_output = Path("outputs/source_docs")
     if base_output.exists():
         print(f"Removing old directory : {base_output}")
         shutil.rmtree(base_output)
@@ -69,17 +69,3 @@ def load_documents(docs_root: str, extensions = (".md", ".ipynb")):
                 )
             )
     return docs
-
-if __name__ == "__main__":
-    
-
-    cleanup_old_outputs()
-    config = load_config()
-    clone_repo(config)
-    
-    docs_path = config["data_source"]["github"]["target_path"]
-    all_docs = load_documents(docs_path)
-    print(f"\nLoaded {len(all_docs)} document(s):")
-    for doc in all_docs:
-        print(f"- {doc.metadata['file_path']} ({doc.metadata['file_type']})")
-
