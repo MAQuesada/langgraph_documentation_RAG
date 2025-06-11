@@ -264,3 +264,4 @@ cython_debug/
 
 #qdrant database for persisted vectorbase data
 qdrant_storage/
+qdrant_data
