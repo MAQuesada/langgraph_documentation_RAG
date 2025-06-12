@@ -5,11 +5,10 @@ from pathlib import Path
 import uuid
 import json
 import numpy as np
-import os
 
-EMBED_MODEL = 'all-MiniLM-L6-v2'
-QDRANT_PATH = Path('qdrant_data')
-COLLECTION_NAME = 'langgraph_docs'
+EMBED_MODEL = "all-MiniLM-L6-v2"
+QDRANT_PATH = Path("qdrant_data")
+COLLECTION_NAME = "langgraph_docs"
 EMBEDDINGS_DIR = Path("docs/embeddings")
 EMBEDDINGS_FILE = EMBEDDINGS_DIR / "embeddings.npy"
 METADATA_FILE = EMBEDDINGS_DIR / "chunk_metadata.json"
@@ -17,9 +16,12 @@ METADATA_FILE = EMBEDDINGS_DIR / "chunk_metadata.json"
 embedder = SentenceTransformer(EMBED_MODEL)
 client = QdrantClient(path=str(QDRANT_PATH))
 
+
 def store_embeddings(chunks, config=None):
     # Ensure collection exists
-    if COLLECTION_NAME not in [col.name for col in client.get_collections().collections]:
+    if COLLECTION_NAME not in [
+        col.name for col in client.get_collections().collections
+    ]:
         client.recreate_collection(
             collection_name=COLLECTION_NAME,
             vectors_config=VectorParams(size=384, distance=Distance.COSINE),
@@ -50,9 +52,7 @@ def store_embeddings(chunks, config=None):
     print("Uploading embeddings to Qdrant...")
     points = [
         PointStruct(
-            id=str(uuid.uuid4()),
-            vector=embeddings[i],
-            payload=metadata_list[i]
+            id=str(uuid.uuid4()), vector=embeddings[i], payload=metadata_list[i]
         )
         for i in range(len(metadata_list))
     ]
@@ -68,7 +68,7 @@ def search_qdrant(query: str, top_k: int = 5):
         collection_name=COLLECTION_NAME,
         query_vector=query_vector,
         limit=top_k,
-        with_payload=True
+        with_payload=True,
     )
 
     print(f"\nTop {top_k} results for query: '{query}'\n")

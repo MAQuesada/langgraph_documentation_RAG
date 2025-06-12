@@ -6,13 +6,13 @@ data_source:
     clone_url: "https://github.com/langchain-ai/langgraph.git"
     target_path: "docs/source_docs"
     local_cache: "langgraph_repo/docs/docs"
-  
+
   file_filtering:
     included_formats:
       - ".md"          # Markdown files
       - ".ipynb"       # Jupyter notebooks
       - ".mdx"         # MDX files (if any)
-    
+
     excluded_patterns:
       - "**/.*"                    # Hidden files
       - "**/__pycache__"          # Python cache
@@ -25,25 +25,25 @@ document_processing:
   chunking:
     semantic : True  # Preserve semantic similarity
     chunk_size: 5000                # For recursive splitter fallback
-    chunk_overlap: 500                # More overlap for context
-    
+    chunk_overlap: 600                # More overlap for context
+
     # Markdown-specific settings
     markdown:
       preserve_code_blocks: true
-      code_fence_markers: 
+      code_fence_markers:
       - "```"
       - "~~~"
       headers_to_split: ["##", "###"]        # Split on h2 and h3
       preserve_tables: true
-    
-    # Notebook-specific settings  
+
+    # Notebook-specific settings
     notebook:
       extract_code_cells: true
       extract_markdown_cells: true
       preserve_cell_boundaries: true
       include_outputs: false           # Skip execution outputs
       max_cell_length: 2000
-  
+
   metadata_extraction:
     standard_fields:
       - "file_path"
@@ -52,7 +52,7 @@ document_processing:
       - "cell_type"                   # For notebooks
       - "has_code_blocks"
       - "code_languages"
-    
+
     code_analysis:
       detect_languages: true
       extract_imports: true
@@ -68,12 +68,12 @@ qdrant:
     grpc_port: 6334
     api_key: ${QDRANT_API_KEY}        # Environment variable
     timeout: 30
-    
+
   collection:
     name: "langgraph_docs"
     vector_dimension: 1536            # OpenAI text-embedding-3-small
     similarity_metric: "cosine"
-    
+
     # Optimized for code and documentation
     indexing:
       hnsw:

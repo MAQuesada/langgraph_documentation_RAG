@@ -3,7 +3,6 @@ import os
 import stat
 import shutil
 from pathlib import Path
-from vector_database.src.utils import load_config
 from langchain_core.documents import Document
 
 
@@ -12,12 +11,13 @@ def handle_remove_readonly(func, path, exc):
     os.chmod(path, stat.S_IWRITE)  # Make file writable
     func(path)  # Retry the operation
 
+
 def clone_repo(config: dict):
     """Clones a GitHub repo copies it from a local cache, depending on the config.
-    
+
     Args:
         config (dict) : Configuration dictionary loaded from config.yaml"""
-    
+
     github_config = config["data_source"]["github"]
     clone_url = github_config["clone_url"]
     target_path = github_config["target_path"]
@@ -40,9 +40,9 @@ def clone_repo(config: dict):
             Repo.clone_from(clone_url, target_path)
         except GitCommandError as e:
             print(f"Error cloning repository : {e}")
-    
+
     if not os.listdir(target_path):
-        raise ValueError(f'Cloned/copied directory {target_path} is empty!')
+        raise ValueError(f"Cloned/copied directory {target_path} is empty!")
 
 
 def cleanup_old_outputs():
@@ -51,21 +51,19 @@ def cleanup_old_outputs():
         print(f"Removing old directory : {base_output}")
         shutil.rmtree(base_output)
 
-def load_documents(docs_root: str, extensions = (".md", ".ipynb")):
+
+def load_documents(docs_root: str, extensions=(".md", ".ipynb")):
     docs = []
     root = Path(docs_root)
 
     for path in root.rglob("*"):
         if path.is_file() and path.suffix in extensions:
-            with open(path, "r", encoding="utf-8") as f:
+            with open(path, encoding="utf-8") as f:
                 content = f.read()
             docs.append(
                 Document(
-                    page_content = content,
-                    metadata = {
-                    "file_path" : str(path),
-                    "file_type" : path.suffix
-                    }
+                    page_content=content,
+                    metadata={"file_path": str(path), "file_type": path.suffix},
                 )
             )
     return docs
