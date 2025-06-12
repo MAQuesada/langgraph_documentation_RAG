@@ -9,7 +9,9 @@ import json
 load_dotenv()
 
 
-def chunk_documents(documents, config) -> List[Document]:
+def chunk_documents(documents: list[Document], config: dict) -> List[Document]:
+    """Chunks documents into smaller segments."""
+
     chunking_config = config["document_processing"]["chunking"]
     chunk_size = chunking_config.get("chunk_size", 5000)
     chunk_overlap = chunking_config.get("chunk_overlap", 600)
@@ -57,7 +59,11 @@ def chunk_documents(documents, config) -> List[Document]:
     return all_chunks
 
 
-def save_chunks_to_disk(chunks, output_dir="docs/chunked_docs"):
+def save_chunks_to_disk(
+    chunks: list[Document], output_dir: str = "docs/chunked_docs"
+) -> None:
+    """Saves chunks of documents to disk."""
+
     output_path = Path(output_dir)
     output_path.mkdir(parents=True, exist_ok=True)
 

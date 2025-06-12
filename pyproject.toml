@@ -8,8 +8,8 @@ readme = "README.md"
 
 packages = [
     {include = "prompts"},
-    {include = "other_paq"},
     {include = "vector_database"}
+    {include = "rag_pipeline"}
 ]
 
 [tool.poetry.dependencies]
@@ -23,7 +23,6 @@ langgraph = "^0.4.8"
 requests = "^2.32.3"
 markdown = "^3.8"
 qdrant-client = "^1.14.2"
-langchain-community = "^0.3.24"
 pypdf = "^5.6.0"
 python-docx = "^1.1.2"
 jupyter = "^1.1.1"

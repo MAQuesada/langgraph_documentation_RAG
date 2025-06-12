@@ -45,14 +45,18 @@ def clone_repo(config: dict):
         raise ValueError(f"Cloned/copied directory {target_path} is empty!")
 
 
-def cleanup_old_outputs():
-    base_output = Path("outputs/source_docs")
+def cleanup_old_outputs(file_path="outputs/source_docs"):
+    """Removes the old outputs directory if it exists."""
+
+    base_output = Path(file_path)
     if base_output.exists():
         print(f"Removing old directory : {base_output}")
         shutil.rmtree(base_output)
 
 
-def load_documents(docs_root: str, extensions=(".md", ".ipynb")):
+def load_documents(docs_root: str, extensions=(".md", ".ipynb")) -> list[Document]:
+    """Loads documents from a directory."""
+
     docs = []
     root = Path(docs_root)
 

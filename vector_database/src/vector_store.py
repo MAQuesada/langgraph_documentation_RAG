@@ -4,9 +4,12 @@ from pathlib import Path
 import uuid
 import json
 import numpy as np
-from langchain.embeddings.openai import OpenAIEmbeddings
+from langchain_openai import OpenAIEmbeddings
+from langchain_core.documents import Document
+
 
 EMBED_MODEL = "text-embedding-3-large"
+DIMENSION = 1024
 QDRANT_PATH = Path("qdrant_data")
 COLLECTION_NAME = "langgraph_docs"
 EMBEDDINGS_DIR = Path("docs/embeddings")
@@ -15,17 +18,17 @@ METADATA_FILE = EMBEDDINGS_DIR / "chunk_metadata.json"
 
 
 client = QdrantClient(path=str(QDRANT_PATH))
-embeddings = OpenAIEmbeddings(model=EMBED_MODEL)
+embeddings = OpenAIEmbeddings(model=EMBED_MODEL, dimensions=DIMENSION)
 
 
-def store_embeddings(chunks, config=None):
+def store_embeddings(chunks: list[Document], config: dict = {}):
     # Ensure collection exists
     if COLLECTION_NAME not in [
         col.name for col in client.get_collections().collections
     ]:
         client.recreate_collection(
             collection_name=COLLECTION_NAME,
-            vectors_config=VectorParams(size=384, distance=Distance.COSINE),
+            vectors_config=VectorParams(size=DIMENSION, distance=Distance.COSINE),
         )
 
     # Load from disk if embeddings exist
