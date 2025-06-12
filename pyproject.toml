@@ -8,7 +8,7 @@ readme = "README.md"
 
 packages = [
     {include = "prompts"},
-    {include = "vector_database"}
+    {include = "vector_database"},
     {include = "rag_pipeline"}
 ]
 
