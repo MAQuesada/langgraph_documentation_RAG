@@ -1,62 +1,70 @@
-# LangGraph RAG Agent: Retrieval-Augmented Generation over Technical Documentation
+# LangGraph RAG Pipeline: Retrieval-Augmented Generation over Technical Documentation
 
 ## 📌 Abstract
 
-Retrieval-Augmented Generation (RAG) has emerged as a powerful framework for building LLM-based assistants that can access dynamic external knowledge without retraining. In this project, we develop a LangGraph-powered RAG system capable of answering complex technical questions by retrieving and reasoning over the official LangGraph documentation. Our architecture integrates LangChain, Qdrant vector store, OpenAI's `text-embedding-3-large`, and LangSmith for monitoring, delivering a modular and scalable assistant that understands and explains multi-agent workflows in LangGraph. The project demonstrates how a LangGraph-based agent can be constructed to interact with domain-specific content with contextual memory, prompt modularity, and strong traceability.
+Retrieval-Augmented Generation (RAG) has emerged as a transformative technique in the domain of natural language processing, enabling large language models (LLMs) to access and reason over external knowledge sources without the need for constant retraining. This hybrid framework combines the strengths of dense retrieval and generative modeling, allowing systems to dynamically incorporate relevant context from large knowledge base such as technical documentation into their responses. In the context of software and framework documentation, RAG significantly improves accessibility by allowing users to interact with complex materials through natural language queries. Instead of manually searching through static documents, developers and users can receive context-aware, conversational answers tailored to their information needs. This capability makes RAG an invaluable tool for enhancing developer productivity, reducing onboarding time, and democratizing access to specialized technical knowledge.
 
 ---
 
 ## 🔍 Introduction
 
-Large Language Models (LLMs) often struggle to answer niche or domain-specific queries unless fine-tuned on custom data—an expensive and time-consuming process. RAG solves this by combining LLMs with an external retrieval mechanism, allowing real-time access to updated content while minimizing computational costs.
+LangGraph Documentation RAG is an advanced Retrieval-Augmented Generation (RAG) pipeline designed to make the official LangGraph documentation easily searchable, chunkable, and ready for LLM-powered question answering. The project clones the latest LangGraph documentation, parses and organizes markdown and notebook files, extracts code and text blocks, and stores them in a vector database (Qdrant). Seamless integration of modern text chunking, metadata enrichment, and support for OpenAI embeddings enables powerful semantic search and Q&A functionality over the LangGraph documentation. 
 
-This project leverages:
-- **LangGraph**: for defining the agent workflow and state transitions.
+**Main frameworks used:**
+- **LangGraph**: for building end-to-end RAG pipeline.
 - **LangChain**: for LLM abstraction and orchestration.
 - **Qdrant**: as a scalable vector database.
 - **OpenAI**: for embeddings and language generation.
-- **LangSmith**: for performance monitoring and debugging.
-
-The target use case is to assist users in exploring LangGraph’s complex features and documentation through natural language queries—answering everything from architectural concepts to agent behavior.
 
 ---
 
-## 🏗️ System Architecture
+## 🏗️ System Architecture and steps for LangGraph documentation RAG workflow
 
-### 1. 📚 Document Ingestion
+### 1. 📚 Documentation Loading and Ingestion
 
 LangGraph documentation is cloned from its public repository using a custom ingestion pipeline. The process includes:
-- Cleaning old outputs
-- Loading all markdown and text files
-- Recursive chunking with a max chunk size (e.g., 1000–2000 tokens)
-- Saving processed chunks for embedding
 
-Total number of documents: 184
-Chunk lengths: 
-- Min: 264
-- Max: 88,210
-- Avg: 10,370
-- Median (Q2): 7,471
-These chunks are then embedded using OpenAI’s text-embedding-3-large model and indexed into Qdrant with appropriate metadata.
+- Cleaning old outputs for upgrading with new uploaded documentation if available.
+- Loading all markdown and text files from the directory if downloading from github not needed.
+- Converting .ipynb files into markdown string using only markdown and code cells while ignoring output cells for better data to generate semantic embeddings.
+- Recursive chunking with a maximum chunk size limit.
+- Saving processed chunks for further processing and generate embeddings.
+- Embedding text chunks using OpenAI’s `text-embedding-3-large` model and ingested into Qdrant database with appropriate metadata.
+  
+#### Documentation descriptive statistics
 
-2. 🧠 Prompting Strategy
-Prompt templates are defined using a YAML-driven structure and modularized via a custom Python class. We support reasoning strategies including:
+**Total number of documents:** 184
+**Minimum of document length:** 264
+**Average of document length:** 10345.88
+**Maximum of document length:** 88210
+**Q1 (25th percentile):** 3294.5
+**Values below Q1:** 46
+**Q2 (50th percentile):** 7471.0
+**Values below Q2:** 92
+**Q3 (75th percentile):** 13031.5
+**Values below Q3:** 138
 
-•ReAct (retrieve-act)
 
-•Chain-of-thought
 
-•Self-ask
+### 2. 🔎 Populating the Vector Store (Qdrant)
 
-Prompt Components:
-System Prompt: Filters irrelevant queries and ensures the assistant responds only to LangGraph-related questions.
+- Qdrant vector database is chosen for its efficient similarity search, REST API, local persistence, and production-readiness.
+- Indexed chunks are embedded using OpenAI’s embedding model and stored with contextual metadata (chunk id, content, file path).
+- Search queries are performed using cosine similarity to fetch the top-k relevant chunks per user input.
+- Qdrant Vector Store instance is used along with caching so that the vector store is only created once.
 
-Chatbot Prompt: Guides the model through the retrieval and reasoning process, often breaking down a single query into multiple tool-based retrieval steps.
 
-3. 🔎 Vector Store (Qdrant)
-We chose Qdrant for its efficient similarity search, REST API, and production-readiness. Indexed chunks are embedded using OpenAI’s embedding model and stored with contextual metadata (title, section, file path). Search queries are performed using cosine similarity to fetch the top-k relevant chunks per user input.
+### 3. 🧠 Prompting Workflow
 
-4. 🤖 RAG Pipeline with LangGraph
+- Loading prompts based on a YAML config file.
+- Formatting and building prompts based on section intro, content, and config dictionaries.
+- Configuration includes information like role of the system, goal to be achieved, instruction given to the LLM, background information as context, output constraints, output format, examples, and style or tone
+  among others.
+- Reasoning strategies including Chain of Thought (CoT), Self Ask, and ReAct are mentioned in the relevant config file to be used as found appropriate. 
+
+
+
+### 4. 🤖 RAG Pipeline with LangGraph
 LangGraph powers the logic of the agent’s interaction:
 
 •Each user query becomes a new workflow in LangGraph.
@@ -75,7 +83,8 @@ LangGraph powers the logic of the agent’s interaction:
 
 •LangGraph also manages branching logic and agent state transitions with full traceability using LangSmith.
 
-5. 💬 Memory and Context Handling
+### 5. 💬 Memory and Context Handling
+
 We integrate LangGraph’s native memory system using PostgreSQL checkpoints. This ensures:
 
 •Long-running conversations retain user context
@@ -84,8 +93,8 @@ We integrate LangGraph’s native memory system using PostgreSQL checkpoints. Th
 
 •Trimming to 5 past interactions maintains focus and prevents bloating
 
-🧪 Monitoring and Evaluation
-We use LangSmith for:
+### 6. 🧪 Monitoring and Evaluation
+LangSmith is used for:
 
 •Observing LLM inputs/outputs
 
@@ -95,7 +104,7 @@ We use LangSmith for:
 
 •Conducting offline evaluation with saved traces
 
-💻 Example Use Cases
+### 7. 💻 Example Use Cases
 “What is the difference between a workflow and an agent in LangGraph?”
 → The assistant breaks down the question into two tool calls, retrieves definitions from docs, and synthesizes a clear answer.
 
@@ -105,7 +114,7 @@ We use LangSmith for:
 “Explain how multi-agent routing is handled in LangGraph.”
 → The assistant fetches multiple docs, compares routing strategies, and provides examples from the codebase.
 
-✅ Observations:
+### 8. ✅ Observations:
 💪 Strengths
 •Modular and well-structured RAG implementation
 
@@ -113,29 +122,29 @@ We use LangSmith for:
 
 •Stack uses only open-source components and scalable tools
 
-⚠️ Limitations
+### 9. ⚠️ Limitations
 •Retrieval depends heavily on chunking quality
 
 •Latency increases with decomposition and multi-hop retrieval
 
 •Lacks reranking or cross-encoder scoring for better chunk selection
 
-🧩 Conclusion
+### 10. 🧩 Conclusion
 This project demonstrates the power of LangGraph as both a framework and knowledge source in building domain-specific RAG agents. The assistant provides reliable, traceable, and explainable responses on technical documentation—paving the way for customizable support agents across any domain.
 
-🚀 Future Work
+### 🚀 Future Work
 •Integrate reranking via LLM or cross-encoder
 
 •Summarize long documents pre-indexing
 
 •Add user personalization to memory and retrieval
 
-👥 Contributors
-•Manuel – LangGraph workflow + RAG Agent
+### 👥 Contributors
+•Manuel – https://www.linkedin.com/in/manuel-alejandro-quesada-martinez-0b9534238/
 
-•Utkarsh – Vector DB ingestion and embeddings
+•Utkarsh – https://www.linkedin.com/in/utkarsh-dubey-a87a71209/
 
-•Pranav – Research, system documentation, and publication
+•Pranav – https://www.linkedin.com/in/pranav-tiwari-122706249/
 
 📫 Contact
 Open to collaboration and contributions:
