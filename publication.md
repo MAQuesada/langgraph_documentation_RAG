@@ -31,7 +31,6 @@ LangGraph documentation is cloned from its public repository using a custom inge
 - Recursive chunking with a max chunk size (e.g., 1000–2000 tokens)
 - Saving processed chunks for embedding
 
-```bash
 Total number of documents: 184
 Chunk lengths: 
 - Min: 264
