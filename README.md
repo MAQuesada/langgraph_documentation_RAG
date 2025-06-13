@@ -5,15 +5,12 @@ A **Retrieval-Augmented Generation (RAG)** agent designed to answer technical qu
 
 ---
 
+
 ## 🧠 Architecture Overview
 
-> 📌 _Attach the architecture diagram image here (e.g., `docs/architecture.png`)_  
-> Example syntax:
 
-```markdown
 ![flows](https://github.com/user-attachments/assets/5b901790-8753-47fb-be2c-f06aa0590f49)
 
-```
 
 ---
 
