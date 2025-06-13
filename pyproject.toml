@@ -36,6 +36,7 @@ langchain-community = "^0.3.25"
 openai = "^1.85.0"
 langchain-experimental = "^0.3.4"
 langchain-qdrant = "^0.2.0"
+matplotlib = "^3.10.3"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
