@@ -1,159 +1,115 @@
-# LangGraph Documentation RAG 🤖🚀
+# 🧠 LangGraph Documentation RAG Assistant
 
-...<description here>...
+A Retrieval-Augmented Generation (RAG) agent built with **LangGraph**, capable of answering technical questions about the LangGraph framework using its own documentation as the knowledge base.
 
-## Dependencies Management with Poetry
+This project demonstrates a full-stack implementation of a **domain-specific assistant**, integrating document parsing, chunking, embedding, vector search, agent reasoning, memory handling, and monitoring — all using modern LLM tooling.
 
-This project uses **Poetry** to manage dependencies and virtual environments efficiently.
+---
 
-### 1. Install Poetry
+## 🔧 Tech Stack
 
-Ensure you have Poetry installed:
+| Component        | Tool/Service              | Purpose                             |
+|------------------|---------------------------|-------------------------------------|
+| **LLM**          | OpenAI (GPT-4)            | Language generation                 |
+| **Embeddings**   | `text-embedding-3-large`  | Document vectorization              |
+| **Vector DB**    | Qdrant                    | Semantic retrieval                  |
+| **Agent Engine** | LangGraph                 | Workflow orchestration              |
+| **LLM Orchestration** | LangChain            | Tool chaining and prompts           |
+| **Monitoring**   | LangSmith                 | Observability and traceability      |
+| **Memory**       | PostgreSQL (LangGraph)    | Multi-turn memory checkpointing     |
+| **Environment**  | Poetry                    | Dependency and environment management
 
-```bash
+---
+
+## 🧩 Features
+
+- ✅ RAG pipeline with real-time semantic search over LangGraph docs
+- 🧠 Modular prompt design using ReAct and chain-of-thought
+- 🗃️ Efficient document chunking + embedding via OpenAI
+- 💬 Memory-augmented conversations (5-turn limit)
+- 📊 Evaluation and traceability via LangSmith
+- 📂 Configurable YAML-based workflows
+
+---
+
+## 📁 Project Structure
+langgraph_documentation_RAG/
+├── main.py # Document ingestion and chunking
+├── vector_database/ # Vector indexing pipeline
+│ ├── src/
+│ │ ├── documentation_loader.py
+│ │ ├── text_splitter.py
+│ │ └── utils.py
+├── config.yaml # RAG + ingestion configuration
+├── prompts/ # Prompt templates in YAML
+├── publication.md # Formal technical documentation
+├── README.md # Project guide
+└── .env # API keys & environment variables
+
+
+---
+
+## 🚀 Getting Started
+
+### 1. Clone the Repository
+
+### 2. Install Dependencies (Using Poetry)
+Make sure Poetry is installed:
 curl -sSL https://install.python-poetry.org | python3 -
-```
-
-Verify the installation:
-
-```bash
-poetry --version
-```
-
-### 2. Initialize Poetry in the Project (First-Time Setup Only)
-
-If this is the first time setting up the project, navigate to the project folder and initialize Poetry:
-
-```bash
-cd langgraph_documentation_RAG
-poetry init
-```
-
-If the project is already initialized, skip this step and proceed to dependency installation.
-
-### 3. Install Dependencies
-
-Add the new dependencies to the project, for example:
-
-```bash
-poetry add numpy pandas requests
-```
-
-For development dependencies, use the following:
-
-```bash
-poetry add --dev black pytest
-```
-
-### 4. Activate the Virtual Environment
-
-Poetry automatically creates a virtual environment. To activate it, first make sure to have installed :
-
-```bash
-poetry self add poetry-plugin-shell
-```
-
-Then, activate the virtual environment:
-
-```bash
+Install dependencies:
+poetry install
 poetry shell
-```
 
-To run a script within the virtual environment without activating it:
+### 3. Set Environment Variables
+Create a .env file with your OpenAI API key and other credentials:
+OPENAI_API_KEY=your-api-key
 
-```bash
+🛠️ Run the Pipeline
+Step 1: Preprocess Documents
+bash
 poetry run python main.py
-```
 
-### 5. Store Virtual Environment in the Project (Optional)
+This will:
+Clone the LangGraph documentation repo
 
-To keep the virtual environment inside the project folder:
+Split and chunk content
 
-```bash
-poetry config virtualenvs.in-project true
-poetry install
-```
+Prepare documents for vector embedding
 
-This will create a `.venv/` directory inside the project.
+Step 2: Launch the Assistant (Jupyter/Streamlit/Notebook)
+You can now start querying the agent inside a notebook or terminal interface. Add LangGraph workflows that use retriever + prompt components to complete the full pipeline.
 
-### 6. Check the Environment Status
+💬 Example Queries
+“What is the difference between a router and a supervisor in LangGraph?”
 
-To view environment details:
+“How does LangGraph handle memory between agent steps?”
 
-```bash
-poetry env info
-```
+“Can you explain how tool calling is implemented in LangGraph?”
 
-To list installed dependencies:
+🧪 Monitoring with LangSmith
+Enable LangSmith in your .env and use it to:
 
-```bash
-poetry show
-```
+Trace tool usage and output
 
-### 7. Reproducing the Environment on Another Machine
+Compare versions
 
-When cloning the project, run:
+Debug LLM responses
 
-```bash
-poetry install
-```
+🧾 Publication
+For a formal explanation of the design, methods, and contributions, read our full 📄 publication.md
 
-This will install all dependencies as specified in `pyproject.toml` and `poetry.lock`.
+👥 Contributors
+Pranav Tiwari — Research, Documentation, Publication
 
-### 8. Generating the requirements.txt using Poetry
+Utkarsh — Vector Database and Embedding System
 
-Make sure the poetry-plugin-export plugin is installed. If not, you can install it with the following command:
- `poetry self add poetry-plugin-export`.
+Manuel — RAG Agent + LangGraph Workflow
 
-Then, export your project’s dependencies to a requirements.txt file using:
+📬 Contact & Contributions
+We welcome pull requests, feedback, and collaboration!
 
-```bash
-poetry export --without-hashes -f requirements.txt --output requirements.txt
-```
+📧 Email: [your.email@example.com]
+🐙 GitHub: [your-username]
 
-## Pre-commit Setup
-
-Once you have installed the dependencies using `poetry install`, you will need to configure pre-commit hooks:
-
-```python
-pre-commit install
-```
-
-This command sets up the pre-commit hooks that automatically format your code according to the rules defined in the `.pre-commit-config.yaml` file. The hooks are executed before each commit, and if any rule fails, the commit will be blocked. You can also run the hooks manually with:
-
-```python
-pre-commit run --all
-```
-
-<!-- ___
-
-##  Docker Development Setup
-
-Follow these steps to get the main application running using Docker:
-
-1. **Ensure Prerequisites Are Installed**
-   Verify that Docker and Docker Compose are installed:
-   ```bash
-   docker --version
-   docker-compose --version
-   ```
-
-2. **Configure Environment Variables**
-   Create a `.env` file in the project root with the required environment variables (e.g., API keys, tokens).
-
-3. **Build and Start the Container**
-   Run the following command to build the Docker image and start the container:
-   ```bash
-   docker-compose up --build -d
-   ```
-   > **Note:** The `--build` flag forces a rebuild of the Docker image. This ensures that any changes to the source code, dependencies, or configurations are incorporated into the container.
-
-4. **Monitor the Application**
-   Check the logs to verify that the application is running properly:
-   ```bash
-   docker-compose logs -f
-   ```
-
-5. **Development Workflow**
-   Since the project’s source code is mounted as a volume, changes made locally will be reflected immediately in the running container. If you update dependencies or configuration files, remember to run `docker-compose up --build` again to rebuild the image and apply these changes.
-``` -->
+📘 License
+This project is open source under the MIT License.
