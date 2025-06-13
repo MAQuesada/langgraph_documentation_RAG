@@ -11,6 +11,7 @@ repos:
     args: [ '--unsafe' ]
   - id: check-merge-conflict
   - id: check-added-large-files
+    args: ['--maxkb=1024']
   - id: pretty-format-json
     name: Format json files
     args: [ --autofix, --no-ensure-ascii, --no-sort-keys ]
