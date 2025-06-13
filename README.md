@@ -47,17 +47,26 @@ langgraph_documentation_RAG/
 └── .env # API keys & environment variables
 
 
+
 ---
 
 ## 🚀 Getting Started
 
 ### 1. Clone the Repository
 
+```bash
+git clone https://github.com/MAQuesada/langgraph_documentation_RAG
+cd langgraph_documentation_RAG
+
+
 ### 2. Install Dependencies (Using Poetry)
 Make sure Poetry is installed:
 curl -sSL https://install.python-poetry.org | python3 -
-Install dependencies:
+
+•Install dependencies:
+
 poetry install
+
 poetry shell
 
 ### 3. Set Environment Variables
@@ -70,30 +79,30 @@ bash
 poetry run python main.py
 
 This will:
-Clone the LangGraph documentation repo
+•Clone the LangGraph documentation repo
 
-Split and chunk content
+•Split and chunk content
 
-Prepare documents for vector embedding
+•Prepare documents for vector embedding
 
 Step 2: Launch the Assistant (Jupyter/Streamlit/Notebook)
 You can now start querying the agent inside a notebook or terminal interface. Add LangGraph workflows that use retriever + prompt components to complete the full pipeline.
 
 💬 Example Queries
-“What is the difference between a router and a supervisor in LangGraph?”
+•“What is the difference between a router and a supervisor in LangGraph?”
 
-“How does LangGraph handle memory between agent steps?”
+•“How does LangGraph handle memory between agent steps?”
 
-“Can you explain how tool calling is implemented in LangGraph?”
+•“Can you explain how tool calling is implemented in LangGraph?”
 
 🧪 Monitoring with LangSmith
 Enable LangSmith in your .env and use it to:
 
-Trace tool usage and output
+•Trace tool usage and output
 
-Compare versions
+•Compare versions
 
-Debug LLM responses
+•Debug LLM responses
 
 🧾 Publication
 For a formal explanation of the design, methods, and contributions, read our full 📄 publication.md
@@ -107,9 +116,8 @@ Manuel — RAG Agent + LangGraph Workflow
 
 📬 Contact & Contributions
 We welcome pull requests, feedback, and collaboration!
-
-📧 Email: [your.email@example.com]
-🐙 GitHub: [your-username]
+📧 Email: [mailto:tu_email@ejemplo.com, tiwari.pranav1999@gmail.com, utkarsh251096@gmail.com]
+🌐 GitHub: tu_usuario
 
 📘 License
 This project is open source under the MIT License.
