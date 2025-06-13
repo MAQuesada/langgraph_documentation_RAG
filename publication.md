@@ -43,11 +43,11 @@ These chunks are then embedded using OpenAI’s text-embedding-3-large model and
 2. 🧠 Prompting Strategy
 Prompt templates are defined using a YAML-driven structure and modularized via a custom Python class. We support reasoning strategies including:
 
-ReAct (retrieve-act)
+•ReAct (retrieve-act)
 
-Chain-of-thought
+•Chain-of-thought
 
-Self-ask
+•Self-ask
 
 Prompt Components:
 System Prompt: Filters irrelevant queries and ensures the assistant responds only to LangGraph-related questions.
@@ -60,41 +60,41 @@ We chose Qdrant for its efficient similarity search, REST API, and production-re
 4. 🤖 RAG Pipeline with LangGraph
 LangGraph powers the logic of the agent’s interaction:
 
-Each user query becomes a new workflow in LangGraph.
+•Each user query becomes a new workflow in LangGraph.
 
-Nodes represent tool calls (retriever, prompt executor, memory manager).
+•Nodes represent tool calls (retriever, prompt executor, memory manager).
 
-The Retriever Node fetches context from Qdrant.
+•The Retriever Node fetches context from Qdrant.
 
-The LLM Node decides whether to:
+•The LLM Node decides whether to:
 
-Answer with current context
+•Answer with current context
 
-Ask sub-questions and fetch more info
+•Ask sub-questions and fetch more info
 
-Store conversation in memory (max 5 turns)
+•Store conversation in memory (max 5 turns)
 
-LangGraph also manages branching logic and agent state transitions with full traceability using LangSmith.
+•LangGraph also manages branching logic and agent state transitions with full traceability using LangSmith.
 
 5. 💬 Memory and Context Handling
 We integrate LangGraph’s native memory system using PostgreSQL checkpoints. This ensures:
 
-Long-running conversations retain user context
+•Long-running conversations retain user context
 
-State is restored across sessions
+•State is restored across sessions
 
-Trimming to 5 past interactions maintains focus and prevents bloating
+•Trimming to 5 past interactions maintains focus and prevents bloating
 
 🧪 Monitoring and Evaluation
 We use LangSmith for:
 
-Observing LLM inputs/outputs
+•Observing LLM inputs/outputs
 
-Visualizing tool calls and retrieval paths
+•Visualizing tool calls and retrieval paths
 
-Measuring latency, response length, and accuracy
+•Measuring latency, response length, and accuracy
 
-Conducting offline evaluation with saved traces
+•Conducting offline evaluation with saved traces
 
 💻 Example Use Cases
 “What is the difference between a workflow and an agent in LangGraph?”
@@ -106,37 +106,37 @@ Conducting offline evaluation with saved traces
 “Explain how multi-agent routing is handled in LangGraph.”
 → The assistant fetches multiple docs, compares routing strategies, and provides examples from the codebase.
 
-✅ Observations
-✅ Strengths
-Modular and well-structured RAG implementation
+✅ Observations:
+💪 Strengths
+•Modular and well-structured RAG implementation
 
-Agent can handle multi-hop technical queries
+•Agent can handle multi-hop technical queries
 
-Stack uses only open-source components and scalable tools
+•Stack uses only open-source components and scalable tools
 
 ⚠️ Limitations
-Retrieval depends heavily on chunking quality
+•Retrieval depends heavily on chunking quality
 
-Latency increases with decomposition and multi-hop retrieval
+•Latency increases with decomposition and multi-hop retrieval
 
-Lacks reranking or cross-encoder scoring for better chunk selection
+•Lacks reranking or cross-encoder scoring for better chunk selection
 
 🧩 Conclusion
 This project demonstrates the power of LangGraph as both a framework and knowledge source in building domain-specific RAG agents. The assistant provides reliable, traceable, and explainable responses on technical documentation—paving the way for customizable support agents across any domain.
 
 🚀 Future Work
-Integrate reranking via LLM or cross-encoder
+•Integrate reranking via LLM or cross-encoder
 
-Summarize long documents pre-indexing
+•Summarize long documents pre-indexing
 
-Add user personalization to memory and retrieval
+•Add user personalization to memory and retrieval
 
 👥 Contributors
-Manuel – LangGraph workflow + RAG Agent
+•Manuel – LangGraph workflow + RAG Agent
 
-Utkarsh – Vector DB ingestion and embeddings
+•Utkarsh – Vector DB ingestion and embeddings
 
-Pranav – Research, system documentation, and publication
+•Pranav – Research, system documentation, and publication
 
 📫 Contact
 Open to collaboration and contributions:
