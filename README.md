@@ -9,7 +9,7 @@ A **Retrieval-Augmented Generation (RAG)** agent designed to answer technical qu
 ## 🧠 Architecture Overview
 
 
-![flows](https://github.com/user-attachments/assets/5b901790-8753-47fb-be2c-f06aa0590f49)
+![2 excalidraw](https://github.com/user-attachments/assets/cc77e7f4-151b-4265-8ef1-e10e19db8359)
 
 
 ---
@@ -131,14 +131,14 @@ This project is open source and available under the **MIT License**.
 
 ## 👥 Contributors
 
-- **Pranav Tiwari** – Research + Publication  
-- **Utkarsh** – Vector DB Engineering  
-- **Manuel** – LangGraph Agent Implementation
+- **Manuel** – LangGraph Agent Implementation 
+- **Utkarsh** – Vector DB Engineering
+- **Pranav Tiwari** – Research + Publication 
 
 ---
 
 ## 📫 Contact Open to collaboration and contributions: 
 
--📧 Email: [mailto:tu_email@ejemplo.com, tiwari.pranav1999@gmail.com, utkarsh251096@gmail.com] 
+-📧 Email: [tu_email@ejemplo.com, tiwari.pranav1999@gmail.com, utkarsh251096@gmail.com] 
 
 -🌐 GitHub: tu_usuario
