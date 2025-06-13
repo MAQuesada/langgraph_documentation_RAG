@@ -1,3 +1,4 @@
+import json
 from git import Repo, GitCommandError
 import os
 import stat
@@ -54,16 +55,55 @@ def cleanup_old_outputs(file_path="outputs/source_docs"):
         shutil.rmtree(base_output)
 
 
-def load_documents(docs_root: str, extensions=(".md", ".ipynb")) -> list[Document]:
+def ipynb_to_markdown_string(file_path):
+    """Converts an .ipynb file to a markdown string using only
+    the markdown and code cells (ignoring the output cells).
+    """
+
+    with open(file_path, encoding="utf-8") as f:
+        notebook = json.load(f)
+
+    output_text = []
+
+    for cell in notebook.get("cells", []):
+        cell_type = cell.get("cell_type")
+        source = "".join(cell.get("source", []))
+
+        if cell_type == "markdown":
+            output_text.append(source.strip())
+        elif cell_type == "code":
+            output_text.append(f"```python\n{source.strip()}\n```")
+
+    return "\n\n".join(output_text)
+
+
+def load_documents(
+    docs_root: str,
+    extensions=(".md", ".ipynb"),
+    ignore_files: list[str | Path] = [
+        "docs/source_docs/reference",
+        "docs/source_docs/adopters.md",
+        "docs/source_docs/index.md",
+        "docs/source_docs/llms-txt-overview.md",
+    ],
+) -> list[Document]:
     """Loads documents from a directory."""
 
     docs = []
     root = Path(docs_root)
 
+    ignore_paths = [Path(p).resolve() for p in ignore_files]
+
     for path in root.rglob("*"):
         if path.is_file() and path.suffix in extensions:
-            with open(path, encoding="utf-8") as f:
-                content = f.read()
+            if any(str(ignored) in str(path.resolve()) for ignored in ignore_paths):
+                continue
+
+            if path.suffix == ".ipynb":
+                content = ipynb_to_markdown_string(path)
+            else:
+                with open(path, encoding="utf-8") as f:
+                    content = f.read()
             docs.append(
                 Document(
                     page_content=content,

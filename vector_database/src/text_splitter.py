@@ -22,6 +22,7 @@ def chunk_documents(documents: list[Document], config: dict) -> List[Document]:
         chunk_size=chunk_size,
         chunk_overlap=chunk_overlap,
         length_function=len,
+        separators=["\n```", "```", "\n\n", "\n", "."],
     )
 
     filtered_docs = [
@@ -41,11 +42,11 @@ def chunk_documents(documents: list[Document], config: dict) -> List[Document]:
         }
         try:
             content = doc["page_content"] if isinstance(doc, dict) else doc.page_content
-            metadata = (
-                doc["metadata"]
-                if isinstance(doc, dict)
-                else getattr(doc, "metadata", {})
-            )
+            # metadata = (
+            #     doc["metadata"]
+            #     if isinstance(doc, dict)
+            #     else getattr(doc, "metadata", {})
+            # )
 
             final_chunks = splitter.split_documents(
                 [Document(page_content=content, metadata=metadata)]
