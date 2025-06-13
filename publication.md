@@ -23,7 +23,9 @@ The target use case is to assist users in exploring LangGraph’s complex featur
 
 ## 🏗️ System Architecture
 
-![System Architecture](docs/architecture.png)
+
+![flows](https://github.com/user-attachments/assets/b08f7e5a-f003-49b1-b703-4212e7a20b98)
+
 
 ### 📚 Document Ingestion
 
@@ -151,5 +153,6 @@ This project showcases LangGraph’s utility not only as an orchestration engine
 Open to collaboration and contributions:
 
 -📧 Email: [mailto:tu_email@ejemplo.com, tiwari.pranav1999@gmail.com, utkarsh251096@gmail.com]
+
 -🌐 GitHub: [tu\_usuario](https://github.com/tu_usuario)
 
