@@ -10,8 +10,6 @@ Retrieval-Augmented Generation (RAG) is becoming a popular alternative to fine-t
 
 These advantages make RAG a perfect fit for building intelligent systems that need to stay current and operate over specific corpora—like documentation, internal knowledge, or dynamic content. In this MVP, we present a custom RAG pipeline that uses the **LangGraph documentation** as the core knowledge base and builds the entire reasoning and retrieval workflow using **LangGraph** itself.
 
-## here we should add the RAG pipeline diagram as an image
-
 ---
 
 ## Toolset 🛠️
@@ -19,18 +17,14 @@ These advantages make RAG a perfect fit for building intelligent systems that ne
 Our MVP leverages a modular RAG system where each component has a clear role:
 
 * **LangGraph** is used not just as the subject of the knowledge base, but also as the **framework for defining the workflow** of the assistant.
-
 * **LangChain** provides the foundation for LLM calls and tool integration.
-* **Qdrant** is used as the **vector database** to store and retrieve documentation chunks.
+* **Qdrant** is used as the **vector database** to store the embeddings generated from the chunked documents and retrieve them when needed.
 * **LangSmith** monitors, traces, and evaluates every step of the reasoning and retrieval process.
-
-* The LLM provider is **OpenAI**, configured for a deterministic behavior (temperature = 0.1) to avoid random variations in the model’s output during execution.
-
+* The LLM provider is **OpenAI**, configured for a deterministic behavior (temperature = 0.1) to avoid random variations in the model’s output during execution, making it suitable for technical documentation answering.
 * For the implementation of the RAG system, we built three components:
+
   * **Prompts**: A entry package that contains all the prompts used to generate the responses of the LLM. The prompts are stored in a YAML file and can be easily modified as needed following the guidelines provided in the [Ready Tensor](https://app.readytensor.ai/publications/building-prompts-for-agentic-ai-systems-aaidc-week2-lecture-1-36Hu3DC3TLdu).
-
-  * **Vector Store**: A component in charge of ingesting the LangGraph documentation and storing it in a vector database using Qdrant.
-
+  * **Vector Store**: A component in charge of ingesting the LangGraph documentation, generating embeddings and storing them in a vector database using Qdrant.
   * **RAG-pipeline**: A component in charge of creating a custom RAG pipeline.
 
 This stack allows us to construct a **chatbot** that can deeply understand and navigate LangGraph documentation, answer highly technical questions, and even explain multi-agent workflows by leveraging the source content directly. As result, you don't need to be an expert in LangGraph to use it.
@@ -48,18 +42,13 @@ We have built a Python class to handle prompts in a centralized and modular way.
 For our chatbot, we created two prompts:
 
 1. A System Prompt that acts as a gatekeeper to control access to the LangGraph knowledge base. Its purpose is to filter user questions and determine whether they fall within the chatbot’s scope — in this case, answering questions about LangGraph. If the question is out of scope, the chatbot politely informs the user that it cannot assist with that request.
-
 2. The Chatbot Prompt, which acts as an agent responsible for deciding how to respond to user questions. It has access to the retriever tool, allowing it to search the knowledge base and retrieve relevant information to answer the user’s query. This prompt follows the ReAct reasoning strategy to ensure that responses are coherent and aligned with LangGraph’s knowledge. The model is guided to reason step-by-step based on the information currently available, determining whether more information needs to be retrieved or if an answer can be generated with the existing data. Furthermore, this system prompt encourages the model to generate smaller, more precise sub-questions to retrieve the most relevant information.
 
 ### **Vector Store Component**
 
-Complete this section.....
+For the vector store component, we propose an efficient approach for handling processes including documentation fetching, optimized chunking of the loaded documents, embedding generation and storing in the vector database. This component is in charge of an important step of any RAG system: ingesting and indexing the data into the vector store. The involved functionalities and their significance are described as follows :
 
-This component is in charge of an important step of any RAG system: ingesting and indexing the data into the vector store.
-
-1. Describe the feature of the data used(the files of the LangGraph documentation) and how we chunk it and the content of each chunk including the max chunk size in the recursive splitting process used.
-
-for showing the data structure in the documents:
+1. For **documentation loading**, we have defined functions to load the documentation from the official [LangGraph documentation](https://github.com/langchain-ai/langgraph) by cloning the repository and filtering the relevant technical documents during the loading process. In addition, the loaded document ipynb files are converted to markdown string using only the markdown and code cells without output cells for optimized and use case specific retrieval. Once, downloaded, the documents are stored in a target path for quick loading without the need for cloning the repository, thereby enabling to choose downloading only if needed.
 
 ```bash
 Total number of documents: 184
@@ -76,11 +65,12 @@ Values below Q3: 138
 
 ![alt](boxplot.png)
 
-2. Why we use Qdrant as the vector store and explain a bit the process of index the documents using the embedding model used, in this case openai's `text-embedding-3-large`.
+2. The statistics of the downloaded documentation shows a total of 184 documents with crucial descriptive statistics paving the way for efficient **chunking** strategy. The chunk size is kept at 5000 characters which is approximately half of the average length of the fetched 184 documents coupled with a chunk overalp of 600 words which is cutomizable through the YAML files storing the configuration.
+3. Qdrant vector store is then used to generate the **embeddings** from the processed documentation chunks and store them in the **vector database.** `text-embedding-3-large` model from `OpenAIEmbeddings` is used for generation of the embeddings to be stored in the vector database. In addition, an instance of Qdrant vector store is initialized which supports caching for ensuring the one time creation of vector store thereby enabling faster retrieval of embeddings during client interaction phase.
 
 ### **RAG-pipeline Component**
 
-here you can complete some general information but @manuel is going to complete the details of the RAG-pipeline.
+RAG pipeline stands at the core of facilitating the workflow of the entire chatbot session regarding the technical documentation. It utilizes tool logic to efficiently enable the query receival, embedding transformation, semantic matching in the vector database, and finally retrieving the response in natural language while keeping the context of the conversation for enriched fetching.
 
 #### **RAG-pipeline** explain the workflow implemented using LangGraph
 
@@ -88,7 +78,7 @@ here you can complete some general information but @manuel is going to complete 
 
 #### Use the vector store as a tool to retrieve information requested by the model as a tool call
 
-....
+The Qdrant vector store is passed in the rag calling of the RAGPipeline module which enables the transfer of top 3 matched embeddings of the document chunks with the query generated. This enables a direct communication of vector database with the RAG workflow, facilitating an efficient operation.
 
 #### The state of the workflow in each turn
 
@@ -126,7 +116,6 @@ Show pictures of the example interactions.
 Important: add the following use cases:
 
 1. when the user ask for generic questions explain how the system respond.
-
 2. Example for a complex question for example: the diference of a workflow and an agent and show how the system break down the question and generate two tools calls to retrieve information from the vector store, one for to know the definition of a workflow and another for to know the definition of an agent and finally generate a response using the retrieved information.
 
 Some example queries the assistant can handle:
