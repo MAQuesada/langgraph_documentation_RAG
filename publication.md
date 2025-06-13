@@ -2,7 +2,7 @@
 
 ## 📌 Abstract
 
-Retrieval-Augmented Generation (RAG) has emerged as a powerful framework for building LLM-based assistants that can access dynamic external knowledge without retraining. In this project, we develop a LangGraph-powered RAG system capable of answering complex technical questions by retrieving and reasoning over the official LangGraph documentation. Our architecture integrates LangChain, Qdrant vector store, OpenAI's `text-embedding-3-large`, and LangSmith for monitoring, delivering a modular and scalable assistant that understands and explains multi-agent workflows in LangGraph. The project demonstrates how a LangGraph-based agent can be constructed to interact with domain-specific content with contextual memory, prompt modularity, and strong traceability.
+Retrieval-Augmented Generation (RAG) has emerged as a powerful framework for building LLM-based assistants that can access dynamic external knowledge without retraining. In this project, we develop a LangGraph-powered RAG system capable of answering complex technical questions by retrieving and reasoning over the official LangGraph documentation. Our architecture integrates LangChain, Qdrant vector store, and OpenAI's `text-embedding-3-large`, delivering a modular and scalable assistant that understands and explains multi-agent workflows in LangGraph. The project demonstrates how a LangGraph-based agent can be constructed to interact with domain-specific content with contextual memory, prompt modularity, and strong reasoning capabilities.
 
 ---
 
@@ -11,11 +11,11 @@ Retrieval-Augmented Generation (RAG) has emerged as a powerful framework for bui
 Large Language Models (LLMs) often struggle to answer niche or domain-specific queries unless fine-tuned on custom data—an expensive and time-consuming process. RAG solves this by combining LLMs with an external retrieval mechanism, allowing real-time access to updated content while minimizing computational costs.
 
 This project leverages:
+
 - **LangGraph**: for defining the agent workflow and state transitions.
 - **LangChain**: for LLM abstraction and orchestration.
 - **Qdrant**: as a scalable vector database.
 - **OpenAI**: for embeddings and language generation.
-- **LangSmith**: for performance monitoring and debugging.
 
 The target use case is to assist users in exploring LangGraph’s complex features and documentation through natural language queries—answering everything from architectural concepts to agent behavior.
 
@@ -23,122 +23,133 @@ The target use case is to assist users in exploring LangGraph’s complex featur
 
 ## 🏗️ System Architecture
 
-### 1. 📚 Document Ingestion
+![System Architecture](docs/architecture.png)
 
-LangGraph documentation is cloned from its public repository using a custom ingestion pipeline. The process includes:
+### 📚 Document Ingestion
+
+LangGraph documentation is cloned from its public repository using a custom ingestion pipeline (`main.py`, `vector_database/src/`). The process includes:
+
 - Cleaning old outputs
 - Loading all markdown and text files
-- Recursive chunking with a max chunk size (e.g., 1000–2000 tokens)
+- Recursive chunking (1000–2000 tokens)
 - Saving processed chunks for embedding
 
-Total number of documents: 184
-Chunk lengths: 
-- Min: 264
-- Max: 88,210
-- Avg: 10,370
-- Median (Q2): 7,471
-These chunks are then embedded using OpenAI’s text-embedding-3-large model and indexed into Qdrant with appropriate metadata.
+**Document Stats:**
 
-2. 🧠 Prompting Strategy
-Prompt templates are defined using a YAML-driven structure and modularized via a custom Python class. We support reasoning strategies including:
+- Total documents: 184
+- Min length: 264, Max: 88,210
+- Avg length: 10,370, Median: 7,471
 
-•ReAct (retrieve-act)
+Chunks are embedded using OpenAI’s `text-embedding-3-large` and indexed into Qdrant with metadata.
 
-•Chain-of-thought
+---
 
-•Self-ask
+### 🧠 Prompting Strategy
 
-Prompt Components:
-System Prompt: Filters irrelevant queries and ensures the assistant responds only to LangGraph-related questions.
+Prompt templates are defined in structured YAML files under `prompts/` and modularized via a Python class. Supported reasoning styles include:
 
-Chatbot Prompt: Guides the model through the retrieval and reasoning process, often breaking down a single query into multiple tool-based retrieval steps.
+- **ReAct (Retrieve-Act)**
+- **Chain-of-thought**
+- **Self-ask**
 
-3. 🔎 Vector Store (Qdrant)
-We chose Qdrant for its efficient similarity search, REST API, and production-readiness. Indexed chunks are embedded using OpenAI’s embedding model and stored with contextual metadata (title, section, file path). Search queries are performed using cosine similarity to fetch the top-k relevant chunks per user input.
+#### Prompt Components
 
-4. 🤖 RAG Pipeline with LangGraph
-LangGraph powers the logic of the agent’s interaction:
+- **System Prompt**: Filters irrelevant queries.
+- **Chatbot Prompt**: Drives retrieval and reasoning, decomposes questions if needed, and guides GPT-4 response generation.
 
-•Each user query becomes a new workflow in LangGraph.
+---
 
-•Nodes represent tool calls (retriever, prompt executor, memory manager).
+### 🔎 Vector Store (Qdrant)
 
-•The Retriever Node fetches context from Qdrant.
+Qdrant is used for storing and retrieving document chunks. Key reasons for selection:
 
-•The LLM Node decides whether to:
+- Efficient similarity search with REST API
+- Metadata-based filtering support
+- Easy local deployment
 
-•Answer with current context
+Search is based on cosine similarity over OpenAI embeddings.
 
-•Ask sub-questions and fetch more info
+---
 
-•Store conversation in memory (max 5 turns)
+### 🤖 RAG Pipeline with LangGraph
 
-•LangGraph also manages branching logic and agent state transitions with full traceability using LangSmith.
+LangGraph powers the structured logic of the agent:
 
-5. 💬 Memory and Context Handling
-We integrate LangGraph’s native memory system using PostgreSQL checkpoints. This ensures:
+- **Each user query** becomes a new LangGraph workflow.
+- Nodes represent tools: retriever, prompt executor, memory.
+- **Retriever Node** queries Qdrant for relevant chunks.
+- **LLM Node** decides to:
+  - Answer directly
+  - Fetch more info via sub-questions
+  - Store interaction in memory (5-turn limit)
+- LangGraph manages the flow and context through each turn.
 
-•Long-running conversations retain user context
+---
 
-•State is restored across sessions
+### 💬 Memory and Context Handling
 
-•Trimming to 5 past interactions maintains focus and prevents bloating
+LangGraph’s native memory (e.g., checkpointing with PostgreSQL) enables:
 
-🧪 Monitoring and Evaluation
-We use LangSmith for:
+- Persistent session context
+- Multi-turn dialogue coherence (trimmed to 5 interactions)
+- Session recovery
 
-•Observing LLM inputs/outputs
+---
 
-•Visualizing tool calls and retrieval paths
+## 💻 Example Use Cases
 
-•Measuring latency, response length, and accuracy
+> “What is the difference between a workflow and an agent in LangGraph?”
+> → Two tool calls retrieve definitions, which are then synthesized into an answer.
 
-•Conducting offline evaluation with saved traces
+> “How does checkpointing work in LangGraph?”
+> → Retrieves from memory documentation and explains usage.
 
-💻 Example Use Cases
-“What is the difference between a workflow and an agent in LangGraph?”
-→ The assistant breaks down the question into two tool calls, retrieves definitions from docs, and synthesizes a clear answer.
+> “Explain how multi-agent routing is handled in LangGraph.”
+> → Pulls and compares relevant docs to generate a guided summary.
 
-“How does checkpointing work in LangGraph?”
-→ The assistant navigates to the memory documentation, retrieves steps, and formats a detailed guide.
+---
 
-“Explain how multi-agent routing is handled in LangGraph.”
-→ The assistant fetches multiple docs, compares routing strategies, and provides examples from the codebase.
+## ✅ Observations
 
-✅ Observations:
-💪 Strengths
-•Modular and well-structured RAG implementation
+### 💪 Strengths
 
-•Agent can handle multi-hop technical queries
+- Modular, scalable RAG implementation
+- Handles deep technical queries (multi-hop reasoning)
+- Built on open, production-ready tools
 
-•Stack uses only open-source components and scalable tools
+### ⚠️ Limitations
 
-⚠️ Limitations
-•Retrieval depends heavily on chunking quality
+- Chunking quality heavily impacts retrieval performance
+- Latency can increase with decomposition/retrieval loops
+- No reranking or cross-encoder scoring used yet
 
-•Latency increases with decomposition and multi-hop retrieval
+---
 
-•Lacks reranking or cross-encoder scoring for better chunk selection
+## 🧩 Conclusion
 
-🧩 Conclusion
-This project demonstrates the power of LangGraph as both a framework and knowledge source in building domain-specific RAG agents. The assistant provides reliable, traceable, and explainable responses on technical documentation—paving the way for customizable support agents across any domain.
+This project showcases LangGraph’s utility not only as an orchestration engine but as a knowledge domain itself. The RAG system allows for intuitive exploration of technical concepts, enabling precise responses grounded in source documentation.
 
-🚀 Future Work
-•Integrate reranking via LLM or cross-encoder
+---
 
-•Summarize long documents pre-indexing
+## 🚀 Future Work
 
-•Add user personalization to memory and retrieval
+- Integrate reranking using LLM or cross-encoder
+- Summarize long documents before indexing
+- Add user personalization in memory and retrieval paths
 
-👥 Contributors
-•Manuel – LangGraph workflow + RAG Agent
+---
 
-•Utkarsh – Vector DB ingestion and embeddings
+## 👥 Contributors
 
-•Pranav – Research, system documentation, and publication
+- **Manuel** – LangGraph workflow + RAG Agent
+- **Utkarsh** – Vector DB ingestion and embeddings
+- **Pranav** – Research, system documentation, and publication
 
-📫 Contact
+---
+
+## 📫 Contact 
 Open to collaboration and contributions:
-📧 Email: [mailto:tu_email@ejemplo.com, tiwari.pranav1999@gmail.com, utkarsh251096@gmail.com]
-🌐 GitHub: [tu\_usuario](https://github.com/tu_usuario)
+
+-📧 Email: [mailto:tu_email@ejemplo.com, tiwari.pranav1999@gmail.com, utkarsh251096@gmail.com]
+-🌐 GitHub: [tu\_usuario](https://github.com/tu_usuario)
 
