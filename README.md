@@ -138,5 +138,7 @@ This project is open source and available under the **MIT License**.
 ---
 
 ## 📫 Contact Open to collaboration and contributions: 
-📧 Email: [mailto:tu_email@ejemplo.com, tiwari.pranav1999@gmail.com, utkarsh251096@gmail.com] 
-🌐 GitHub: tu_usuario
+
+-📧 Email: [mailto:tu_email@ejemplo.com, tiwari.pranav1999@gmail.com, utkarsh251096@gmail.com] 
+
+-🌐 GitHub: tu_usuario
