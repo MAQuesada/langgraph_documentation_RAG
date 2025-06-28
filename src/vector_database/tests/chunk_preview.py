@@ -1,12 +1,12 @@
-from vector_database.src.documentation_loader import (
+from vector_database.documentation_loader import (
     clone_repo,
     cleanup_old_outputs,
     load_documents,
 )
-from vector_database.src.text_splitter import chunk_documents, save_chunks_to_disk
+from vector_database.text_splitter import chunk_documents, save_chunks_to_disk
 from dotenv import load_dotenv
 
-from vector_database.src.utils import load_config
+from vector_database.utils import load_config
 
 load_dotenv()
 
