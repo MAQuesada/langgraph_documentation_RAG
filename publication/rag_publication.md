@@ -96,13 +96,15 @@ This statistical overview informed the following design decisions:
 
 With the above considerations in place, the splitting process was implemented using LangChain’s RecursiveTextSplitter, which prioritizes natural breakpoints such as code cells, paragraphs and sentences to improve the internal coherence of the generated chunks. As a result, the original set of 184 documents was transformed into 581 chunks, forming the dataset used for the indexing phase.
 
-#### Indexing chunks into the vector database
+#### Embedding Model
 
-Qdrant vector store is then used to generate the embeddings from the processed documentation chunks and store them in the vector database. For the embedding generation, we have used OpenAI’s *text-embedding-3-large* model accessed via the native OpenAI integration with LangChain. This choice was driven by the ease of integration, the strong support provided by the LangChain ecosystem, and the high-quality semantic representations produced by this embedding model.
+For generating embeddings, we use OpenAI’s *text-embedding-3-large* model, accessed via the native OpenAI integration with LangChain. This choice was driven by the ease of integration, strong support from the LangChain ecosystem, and the high-quality semantic representations the model produces.
 
-We selected Qdrant as the vector store due to its excellent scalability and flexibility. Qdrant can be easily deployed in multiple environments: locally for development and testing, inside Docker containers for isolated and reproducible deployments, or fully managed in the cloud for production-scale systems. This makes it well-suited for both small-scale prototypes and large-scale RAG applications.
+#### Indexing Chunks into the Vector Database
 
-During the indexing process we have stored the source path of each document in the metadata, in addition to embedding the document content. This allows the system to provide users with full transparency about where each retrieved piece of information originated, enabling easy reference back to the original documentation when needed.
+We use Qdrant as the vector store to store the generated embeddings from the processed documentation chunks. Qdrant was selected for its excellent scalability and flexibility—it can be deployed locally, in Docker containers for reproducible environments, or fully managed in the cloud for production-scale systems. This makes it ideal for both small-scale prototypes and large-scale RAG applications.
+
+During the indexing process, we store not only the embedded content but also the source path of each document in the metadata. This ensures full transparency, allowing users to trace each retrieved piece of information back to the original documentation when needed.
 
 ### **RAG-pipeline Component** 🔗
 
