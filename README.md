@@ -5,12 +5,9 @@ A **Retrieval-Augmented Generation (RAG)** workflow designed to answer technical
 
 ---
 
-
 ## 🧠 Architecture Overview
 
-
 ![2 excalidraw](https://github.com/user-attachments/assets/cc77e7f4-151b-4265-8ef1-e10e19db8359)
-
 
 ---
 
@@ -88,17 +85,16 @@ OPENAI_API_KEY=your-key-here
 
 ---
 
-## Run the RAG Pipeline
+## ▶️ Run the RAG Pipeline
 
 Run the `test_end_to_end.ipynb` notebook. It will include:
 
-* Clone the official LangGraph documentation repository.
-* Load and split the documentation into optimized chunks.
-* Generate embeddings using OpenAI’s text-embedding-3-large model.
-* Store the embedded chunks into Qdrant for later retrieval.
-* Build the RAG-pipeline instance.
-* Create an interactive cell for chat.
-
+- Clone the official LangGraph documentation repository.
+- Load and split the documentation into optimized chunks.
+- Generate embeddings using OpenAI’s text-embedding-3-large model.
+- Store the embedded chunks into Qdrant for later retrieval.
+- Build the RAG-pipeline instance.
+- Create an interactive cell for chat.
 
 ### Example Queries
 
@@ -112,8 +108,7 @@ Run the `test_end_to_end.ipynb` notebook. It will include:
 
 ---
 
-
-## For development
+## 🛠  For development
 
 This project uses **Poetry** to manage dependencies and virtual environments efficiently.
 
@@ -235,6 +230,13 @@ This command sets up the pre-commit hooks that automatically format your code ac
 ```python
 pre-commit run --all
 ```
+
+---
+
+## 🔍 More details about this repository
+
+- Ready Tensor Publication: [Stop Searching, Start Asking: LangGraph Documentation at Your Fingertips 🤖🚀](https://app.readytensor.ai/publications/stop-searching-start-asking-langgraph-docs-at-your-fingertips-H2rbE1JDof4y)
+
 ---
 
 ## 🔖 License
@@ -251,6 +253,6 @@ This project is open source and available under the **MIT License**.
 
 ---
 
-## 📫 Contact Open to collaboration and contributions:
+## 📫 Contact Open to collaboration and contributions
 
-* 📧 **Email**:[ [malejandroquesada@gmail.com](mailto:malejandroquesada@gmail.com), [tiwari.pranav1999@gmail.com](mailto:tiwari.pranav1999@gmail.com), [utkarsh251096@gmail.com](mailto:utkarsh251096@gmail.com)]
+- 📧 **Email**:[ [malejandroquesada@gmail.com](mailto:malejandroquesada@gmail.com), [tiwari.pranav1999@gmail.com](mailto:tiwari.pranav1999@gmail.com), [utkarsh251096@gmail.com](mailto:utkarsh251096@gmail.com)]

@@ -1,15 +1,15 @@
 [tool.poetry]
 name = "langgraph-documentation-rag"
-version = "0.1.0"
+version = "0.2.0"
 description = "RAG implementation using LangGraph"
 authors = ["MAQuesada <malejandroquesada@gmail.com>"]
 readme = "README.md"
 
 
 packages = [
-    {include = "prompts"},
-    {include = "vector_database"},
-    {include = "rag_pipeline"}
+    {include = "prompts", from = "src"},
+    {include = "vector_database", from = "src"},
+    {include = "rag_pipeline", from = "src"}
 ]
 
 [tool.poetry.dependencies]
