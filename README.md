@@ -39,15 +39,22 @@ A **Retrieval-Augmented Generation (RAG)** workflow designed to answer technical
 ```
 .
 ├── test_end_to_end.ipynb        # Chatbot execution end-to-end
-├── publication.md               # Technical write-up
-├── prompts/                     # YAML-based prompt templates
-├── rag_pipeline/                # Core agent orchestration
-├── test_notebooks/              # Prompt testing and demo notebooks
-├── vector_database/             # Qdrant vector store integration
-├── example.env                  # Sample environment config
-├── config.yaml                  # Global config for chunking, DB, etc.
 ├── README.md                    # You’re reading it :)
-└── docs/                        # Official LangGraph Documentation
+├── .env                         # Environment variables
+├── .pre-commit-config.yaml      # Pre-commit hooks config
+├── config.yaml                  # Global config for chunking, DB, etc.
+├── example.env                  # Sample environment config
+├── pyproject.toml               # Poetry project configuration
+├── docs/                        # Official LangGraph Documentation(.md or .ipynb)
+├── langgraph_repo/              # LangGraph source or fork
+├── publication/                 # Technical write-up and publishing
+├── qdrant_data/                 # Local Qdrant DB files (ignored typically)
+└── src/                         # Source code
+    ├── prompts/                 # YAML-based prompt templates
+    ├── rag_pipeline/            # Core agent orchestration
+    ├── test_notebooks/          # Demo notebooks
+    └── vector_database/         # Qdrant vector store integration
+
 ```
 
 ---
